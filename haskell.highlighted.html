@@ -83,7 +83,7 @@ ghci> pi * 5^2
 </pre>
 善哉．<br />
 なお Haskell に変数はない，という言い方も多い（値を "束縛" することはあっても，それを変化させられないから）けど，<br /> 
-ここではとりあえず variable と呼んでおきます． 
+ここではとりあえず variable と呼んでおきます．なんかもう全部（数学で言う）関数みたいなもん，みたい．
 </p>
 <h3>Haskell source files</h3>
 <p>ではでは僕らも変数を定義してみよう．と，いうところで…
@@ -397,6 +397,7 @@ areaSquare s <span style="color:#e28964">=</span> areaRect s s
 </p>
 <h2> Local definitions </h2>
 <h3> <code>where</code> clauses </h3>
+<p>
 その関数の中でしか使わへんようなやつをいちいちきちんと定義するのもアレなので．<br />
 Heron の公式 ($ A = \sqrt{s (s-a) (s-b) (s-c)} $ where $ s = (a+b+c)/2 $) 
 <pre style="background:#000;color:#f8f8f8">
@@ -404,3 +405,37 @@ heron a b c <span style="color:#e28964">=</span> <span style="color:#dad085">sqr
     <span style="color:#e28964">where</span> 
     s <span style="color:#e28964">=</span> (a<span style="color:#e28964">+</span>b<span style="color:#e28964">+</span>c) <span style="color:#e28964">/</span> <span style="color:#3387cc">2</span>
 </pre>
+<code>where</code> と local definitions はスペース4つでインデントして区別されます．<br />
+このへん python みたいに whitespace sensitive なわけですねー．<br />
+そしてこれを，
+<pre style="background:#000;color:#f8f8f8">
+heron a b c <span style="color:#e28964">=</span> <span style="color:#dad085">sqrt</span> ( s*(s<span style="color:#e28964">-</span>a)*(s<span style="color:#e28964">-</span>b)*(s<span style="color:#e28964">-</span>c) ) <span style="color:#aeaeae;font-style:italic">-- s はここでは定義されてない</span>
+s <span style="color:#e28964">=</span> (a<span style="color:#e28964">+</span>b<span style="color:#e28964">+</span>c) <span style="color:#e28964">/</span> <span style="color:#3387cc">2</span>  <span style="color:#aeaeae;font-style:italic">-- ここでは a, b, c が定義されてない</span>
+</pre>
+と書くと，<code> s = (a+b+c)/2 </code> のところは <code> heron </code> の右辺の定義の一部としては解釈されないので，<br />
+所定の結果は得られません．
+</p>
+<p>他の例．
+<pre style="background:#000;color:#f8f8f8">
+areaTriangleTrig a b c <span style="color:#e28964">=</span> c * height <span style="color:#e28964">/</span> <span style="color:#3387cc">2</span> <span style="color:#aeaeae;font-style:italic">--三角関数で</span>
+    <span style="color:#e28964">where</span>
+    cosa <span style="color:#e28964">=</span> (b^<span style="color:#3387cc">2</span> <span style="color:#e28964">+</span> c^<span style="color:#3387cc">2</span> <span style="color:#e28964">-</span> a^<span style="color:#3387cc">2</span>) <span style="color:#e28964">/</span> (<span style="color:#3387cc">2</span>*b*c) <span style="color:#aeaeae;font-style:italic">--余弦定理</span>
+    sina <span style="color:#e28964">=</span> <span style="color:#dad085">sqrt</span>(<span style="color:#3387cc">1</span> <span style="color:#e28964">-</span> cosa^<span style="color:#3387cc">2</span>)
+    height <span style="color:#e28964">=</span> b * sina
+areaTriangleHeron a b c <span style="color:#e28964">=</span> result <span style="color:#aeaeae;font-style:italic">--ヘロンの公式から</span>
+    <span style="color:#e28964">where</span>
+    result <span style="color:#e28964">=</span> <span style="color:#dad085">sqrt</span>(s*(s<span style="color:#e28964">-</span>a)*(s<span style="color:#e28964">-</span>b)*(s<span style="color:#e28964">-</span>c))
+    s <span style="color:#e28964">=</span> (a<span style="color:#e28964">+</span>b<span style="color:#e28964">+</span>c) <span style="color:#e28964">/</span> <span style="color:#3387cc">2</span>
+</pre>
+</p>
+<h3> Scope </h3>
+上の例で <code> a </code> とか <code> b </code> とか <code> c </code> とかたくさん出てきたけど，どうなってるんか．<br />
+これはありがたいことに思ったとおりに動く：(<code>let</code> のことは一旦おいといて．)
+<pre style="background:#000;color:#f8f8f8">
+Prelude> let r = 0
+Prelude> let area r = pi * r^2
+Prelude> area 5
+</pre>
+最初に <code>r = 0</code> といってるから <code>area r = pi * r^2</code> で問答無用に 0や! とはなりません．<br />
+要するに 2つの<code> r </code> は別のものを指してるというわけ．<br />
+詳しくはここでは省くけど， scope っていう（他の言語にもあるよね）仕組みで上手くいくようになってる．
