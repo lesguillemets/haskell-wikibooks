@@ -310,7 +310,7 @@ half x = x / 2
 </code> 
 
 </p> 
-<h3> Evaluation </h3>
+<h4> Evaluation </h4>
 <p>
 GHCi に expression を打ち込んだ時に何が起こるのか． <br />
 Enter 押したら ghci は打ち込んだ expression を 評価 --evaluate-- します．<br />
@@ -341,7 +341,7 @@ quadruple x  = double(double x)
 	<li>引数の半分から 12 を引く関数書いてみよう．</li>
 </ul>
 </p>
-<h3> Multiple parameters </h3>
+<h4> Multiple parameters </h4>
 <p>
 もちろん引数は一つとは限らないよー．縦と横与えられて長方形の面積：
 <code Haskell>
@@ -396,8 +396,8 @@ areaSquare s = areaRect s s
 <li> 円柱の体積求める関数書いてみよう．</li>
 </ul>
 </p>
-<h2> Local definitions </h2>
-<h3> <code>where</code> clauses </h3>
+<h3> Local definitions </h3>
+<h4> <code>where</code> clauses </h4>
 <p>
 その関数の中でしか使わへんようなやつをいちいちきちんと定義するのもアレなので．<br />
 Heron の公式 ($ A = \sqrt{s (s-a) (s-b) (s-c)} $ where $ s = (a+b+c)/2 $) 
@@ -429,7 +429,7 @@ areaTriangleHeron a b c = result --ヘロンの公式から
     s = (a+b+c) / 2
 </code>
 </p>
-<h3> Scope </h3>
+<h4> Scope </h4>
 <p>
 上の例で <code> a </code> とか <code> b </code> とか <code> c </code> とかたくさん出てきたけど，大丈夫なんか．<br />
 これはありがたいことに思ったとおりに動く：(<code>let</code> のことは一旦おいといて．)
@@ -484,6 +484,7 @@ Prelude> 2 == True
 そんな比較はできません．<small>上で ghci さんが何を言ってるのかは後ほど読めるようになる．</small><br />
 左辺は数 (type としては <code>Num</code>), 右辺は Boolean value (<code>Bool</code>)<br />
 型 (type) が違うので，比較のしようがないのです．<br />
-これまでは ghci が勝手に解釈してくれていましたが，自分で型を指定することもできます．そのへんも後ほど．<br />
-Haskell のこの型システムは，ちゃんと意味が通るように物事を動かす上で非常に強力です．
+これまでは ghci が勝手に解釈してくれていましたが，自分で型を指定することもでき，<br />
+Haskell のこの型システムは，ちゃんと意味が通るように物事を動かす上で非常に強力です．<br />
+超大事で格好いいので次の章はこの型の話．その前に今の話を片付けてしまいましょう．
 
