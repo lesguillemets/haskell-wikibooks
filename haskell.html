@@ -376,4 +376,31 @@ subtract x y = x - y
 Prelude> (+) 3 2 
 5
 </code>
+演習．
+<ul>
+	<li>直方体の体積出す関数書いてみよう．</li>
+	<li>Giza のピラミッドって大体どのくらいの数の石でできてるだろう？ GHCi さんの助けを借りて計算してみよう．</li>
+</ul>
 </p>
+<p>
+関数使って関数作るのももちろんできるよ<br />
+長方形と正方形の面積求めるもの
+<code Haskell>
+areaRect l w = l * w
+areaSquare s = areaRect s s
+</code>
+こういうのできるの，後々わかってくるけど超便利．<br />
+演習．
+<ul>
+<li> 円柱の体積求める関数書いてみよう．</li>
+</ul>
+</p>
+<h2> Local definitions </h2>
+<h3> <code>where</code> clauses </h3>
+その関数の中でしか使わへんようなやつをいちいちきちんと定義するのもアレなので．<br />
+Heron の公式 ($ A = \sqrt{s (s-a) (s-b) (s-c)} $ where $ s = (a+b+c)/2 $) 
+<code Haskell>
+heron a b c = sqrt ( s*(s-a)*(s-b)*(s-c) )
+    where 
+    s = (a+b+c) / 2
+</code>
