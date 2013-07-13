@@ -82,7 +82,7 @@ ghci> pi * 5^2
 78.53981633974483
 </code>
 善哉．<br />
-この辺りでは結局，式とか函数を評価していって最後に値がひとつ残った時にそれを表示，ということが行われてます．<br />
+この辺りで最後に表示されるのは結局，式とか函数を評価していって最後に値がひとつ残った時にそれを表示，ということが行われてます．<br />
 なお Haskell に変数はない，という言い方も多い（値を "束縛" することはあっても，それを変化させられないから）けど，<br /> 
 ここではとりあえず variable と呼んでおきます．なんかもう全部（数学で言う）関数みたいなもん，みたい．
 </p>
@@ -459,8 +459,10 @@ Main*> area 5 < 50
 </code>
 みたいな書き方ももちろん出来ます．<br />
 帰ってくる値は Boolean values, ないし truth values.
+</p>
 
 <h3> An introduction to types </h3>
+<p>
 Type の話だ！楽しみにしましょう！わーい！<br />
 Truth values が values というてるけど，これはマジでそういうことで， 数値と同じ意味で値を持ってる．<br />
 例えば
@@ -486,5 +488,43 @@ Prelude> 2 == True
 型 (type) が違うので，比較のしようがないのです．<br />
 これまでは ghci が勝手に解釈してくれていましたが，自分で型を指定することもでき，<br />
 Haskell のこの型システムは，ちゃんと意味が通るように物事を動かす上で非常に強力です．<br />
-超大事で格好いいので次の章はこの型の話．その前に今の話を片付けてしまいましょう．
-
+超大事で格好いいので次の章はこの型の話．その前に今の話を片付けてしまいましょう． 
+</p>
+<h3> Infix operators </h3>
+<p>
+さっきの 2 と True を調べた時，
+<code Plain Text>
+In the first argument of `(==)', namely `2'
+</code>
+さて ghc さんは 2 を first argument of (==) と呼んでるわけやけれども，この (==) も普通の函数．<br />
+ただ syntax 的にちょっと違って， Haskell ではこういう，<br />
+名前が英数以外の記号だけでできてる 2 変数関数 は中置できることになってるらしい．<br />
+infix operators, と呼ぶそうな．普通の関数みたいに使うときは ( ) でくくる．
+<code Plain Text>
+Prelude (==) (4 + 9) 13
+True
+</code>
+逆にさっきの <code>areaRect</code> みたいな関数を中置したい時は ` `  でくくって
+<code Haskell>
+2 `areaRect` 5
+</code>
+と書ける．これではあんまり嬉しさもないけど，<code>3 `mod` 2</code> みたいな書き方は素敵そう．<br />
+というわけで <code>==</code> も <code>+</code> も <code> >= </code> もなんでもかんでも関数です．
+</p>
+<h3> Boolean operations </h3>
+and は <code>(&&)</code>, or は <code>(||)</code>, <code>not</code> で論理否定．<br />
+いずれもさっきの infix operator な記法に従います．
+<code Plain Text>
+Prelude> (3 < 8) && (False == False)
+True
+Prelude> (&&) (3 < 8) (False == False)
+True
+Prelude> not (5*2 == 10)
+False
+</code>
+みたいな感じ．なお， not equal to については <code>/=</code> (\neq に形を似せたという噂？) とも書ける．あえて書くなら<br />
+<code Haskell>
+x /= y = not (x == y)
+</code>
+というかんじ（この書き方で完全に正しい）．
+<h3> Guards </h3>
