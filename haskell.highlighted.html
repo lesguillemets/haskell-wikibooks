@@ -82,6 +82,7 @@ ghci> pi * 5^2
 78.53981633974483
 </pre>
 善哉．<br />
+この辺りでは結局，式とか函数を評価していって最後に値がひとつ残った時にそれを表示，ということが行われてます．<br />
 なお Haskell に変数はない，という言い方も多い（値を "束縛" することはあっても，それを変化させられないから）けど，<br /> 
 ここではとりあえず variable と呼んでおきます．なんかもう全部（数学で言う）関数みたいなもん，みたい．
 </p>
@@ -101,9 +102,9 @@ Prelude> r = 3
 <pre style="background:#000;color:#f8f8f8">
 Prelude> let r = 3
 </pre>
-とやれば良いようなのだが，このへんについては詳細を待ちましょう．<br />
-ともかく，以下でやる通りソースファイルを作って読み込んでもらって，<br />
-interacitve にいろいろやっていくのがとりあえずは吉です． 
+とやれば良く，以降もたまに使いますが，基本的には以下でやる通り，<br />
+ソースファイルを作って読み込んでもらって interacitve にいろいろやっていく<br />
+のがとりあえずは吉です． 
 </p>
 <p>
 とりあえずこのあたりは一旦置いといて．変数定義はソースファイルから読み込んでやりましょう．<br />
@@ -429,7 +430,8 @@ areaTriangleHeron a b c <span style="color:#e28964">=</span> result <span style=
 </pre>
 </p>
 <h3> Scope </h3>
-上の例で <code> a </code> とか <code> b </code> とか <code> c </code> とかたくさん出てきたけど，どうなってるんか．<br />
+<p>
+上の例で <code> a </code> とか <code> b </code> とか <code> c </code> とかたくさん出てきたけど，大丈夫なんか．<br />
 これはありがたいことに思ったとおりに動く：(<code>let</code> のことは一旦おいといて．)
 <pre style="background:#000;color:#f8f8f8">
 Prelude> let r = 0
@@ -438,4 +440,50 @@ Prelude> area 5
 </pre>
 最初に <code>r = 0</code> といってるから <code>area r = pi * r^2</code> で問答無用に 0や! とはなりません．<br />
 要するに 2つの<code> r </code> は別のものを指してるというわけ．<br />
-詳しくはここでは省くけど， scope っていう（他の言語にもあるよね）仕組みで上手くいくようになってる．
+詳しくはここでは省くけど， scope っていう（他の言語にもあるよね）仕組みで上手くいくようになってるかんじです．<br />
+つまり，<code>=</code> で結ぶと，以降その定義の scope に照らして適切である範囲で右辺と置き換えられる，みたいな．<br />
+感じ．詳細がなくてすっきりしないけど．
+</p>
+<h2> Truth Values</h2>
+<h3> Equality and other comparisons / Boolean Values  </h3>
+<p>
+アレだ，数学で <code>=</code> って書いてもどっちかいうと proposition としてのそれがあるようなかんじで．
+2つの値の比較には <code>==</code> を使う．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 2 + 3 == 5
+True
+</pre>
+あるいは <code>False</code> が帰ってくる．大小比較は <code> >, <, <=, >=</code> で．
+<pre style="background:#000;color:#f8f8f8">
+Main*> area 5 &lt; 50
+</pre>
+みたいな書き方ももちろん出来ます．<br />
+帰ってくる値は Boolean values, ないし truth values.
+
+<h3> An introduction to types </h3>
+Type の話だ！楽しみにしましょう！わーい！<br />
+Truth values が values というてるけど，これはマジでそういうことで， 数値と同じ意味で値を持ってる．<br />
+例えば
+<pre style="background:#000;color:#f8f8f8">
+Prelude> True == True
+True
+Prelude> True == False
+False
+</pre>
+ってな感じ．では「2 と True は等しいでしょうか？」
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 2 == True
+
+&lt;interactive>:3:1:
+    No instance for (Num Bool) arising from the literal `2'
+    Possible fix: add an instance declaration for (Num Bool)
+    In the first argument of `(==)', namely `2'
+    In the expression: 2 == True
+    In an equation for `it': it = 2 == True
+</pre>
+そんな比較はできません．<small>上で ghci さんが何を言ってるのかは後ほど読めるようになる．</small><br />
+左辺は数 (type としては <code>Num</code>), 右辺は Boolean value (<code>Bool</code>)<br />
+型 (type) が違うので，比較のしようがないのです．<br />
+これまでは ghci が勝手に解釈してくれていましたが，自分で型を指定することもできます．そのへんも後ほど．<br />
+Haskell のこの型システムは，ちゃんと意味が通るように物事を動かす上で非常に強力です．
+
