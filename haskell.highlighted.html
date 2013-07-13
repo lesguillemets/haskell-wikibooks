@@ -1,0 +1,406 @@
+<meta charset="utf-8">
+en.wikibooks の <a href="http://en.wikibooks/org/wiki/Haskell">Haskell</a> をベースに．<br />
+wikibooks のライセンスを継承して CC-BY-SA です．
+<h2>Getting set up</h2>
+<p>
+まずは haskell のインストール． Glasgow Haskell Compiler, GHC がおすすめ．<br />
+ちなみにこの GHC自体も Haskell で書かれてるらしい<small>（だからソースから自分でビルドしようとするとめっちゃ苦労するらしい）</small>．<br />
+ubuntu とかなら
+<pre style="background:#000;color:#f8f8f8">
+$ sudo apt-get update
+$ sudo apt-get install ghc
+</pre>
+でよい． コンパイラとともに GHCi (i for <i>interacitve</i>)という interactive environment がついてきます．<br />
+若干 python とかのインタープリタとは趣が違うんやけど，まあともかくこの人とお話していきましょう．<br />
+linux ならたとえば
+<pre style="background:#000;color:#f8f8f8">
+$ ghci
+GHCi, version 7.6.2: <span style="color:#e18964;text-decoration:underline">http://www.haskell.org/ghc/</span>  :? for help
+Loading package ghc-prim ... linking ... done.
+Loading package integer-gmp ... linking ... done.
+Loading package base ... linking ... done.
+Prelude> 
+</pre>
+というかんじ．<small>かっこいいアスキーアートが出てくる例が多いみたいやけどなんか僕の環境では出てきません． </small><br />
+ここで <code> loading package </code>とかやってくれてますが，<br />
+これによって built-in functions や modules にはだいたいアクセスできる．<br />
+<code>Prelude></code> は prompt ってやつで，ここにコマンドを書き込んでいく．<small>prelude の意味はそのうち出てくるはず．</small><br />
+</p>
+<p>
+というわけで四則とかそのへん．まだすごくない．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 2+2
+4
+Prelude> 5 * 4 + 3 
+23
+Prelude> 2^5
+32
+</pre>
+指数は <code>^</code>で書くぜってあたり以外は特記事項なし．<br />
+...と思ってたら， <code>^</code> は <code>(Integral b, Num a) => a -> b -> a </code>. <br />
+<small>（この記法の意味はしばらく先に出てきます．とりあえずは数なものと Integral なもの（こっちが第2引数）を受け取って数を返す（数学で言う）函数ってこと．）</small><br />
+例えば
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 2^1.2
+</pre>
+はエラーを，
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 2^(-1)
+</pre>
+は Exception を返してくるみたい．<br />
+こういうのも含めて指数を書くときは <code> ** </code> で．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t (**)
+(**) :: Floating a => a -> a -> a
+</pre>
+まとめると
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 2**(-1)
+0.5
+Prelude> 2**0.5
+1.4142135623730951
+Prelude> 1.0^2
+1.0
+</pre>
+これからお世話になる ghci はソースファイル読み込んだりとかもちゃんとできる優秀なひと，らしい．
+</p>
+
+<p><h2>Variables and functions</h2>
+さっきのは単にその場所で計算しっぱなしやったけど，これは不便よね．<br />
+というわけでそういうのは value をもつ variable に保存されます．例えば半径5の円の面積
+<pre style="background:#000;color:#f8f8f8">
+ghci>3.1416 * 5^2
+78.53999999999999
+</pre>
+<small>#これ<code>ghci></code>ってなってるけどたとえば <code>Prelude></code> でやっていい．</small><br />
+やけど，いちいち打ち込むのはあんまりです．<br />
+この場合すでに pi っていう variable が define されてて，
+<pre style="background:#000;color:#f8f8f8">
+ghci> pi
+3.141592653589793
+ghci> pi * 5^2
+78.53981633974483
+</pre>
+善哉．<br />
+なお Haskell に変数はない，という言い方も多い（値を "束縛" することはあっても，それを変化させられないから）けど，<br /> 
+ここではとりあえず variable と呼んでおきます． 
+</p>
+<h3>Haskell source files</h3>
+<p>ではでは僕らも変数を定義してみよう．と，いうところで…
+<pre style="background:#000;color:#f8f8f8">
+Prelude> r = 3
+</pre>
+と何も考えずにやると
+<pre style="background:#000;color:#f8f8f8">
+Prelude> r = 3
+
+&lt;interactive>:9:1: parse error on input '='
+</pre>
+怒られました．このあたりが python のインタープリタと根本的に違うところ，かなあ．<br />
+これを回避するには
+<pre style="background:#000;color:#f8f8f8">
+Prelude> let r = 3
+</pre>
+とやれば良いようなのだが，このへんについては詳細を待ちましょう．<br />
+ともかく，以下でやる通りソースファイルを作って読み込んでもらって，<br />
+interacitve にいろいろやっていくのがとりあえずは吉です． 
+</p>
+<p>
+とりあえずこのあたりは一旦置いといて．変数定義はソースファイルから読み込んでやりましょう．<br />
+<code>Varfun.hs</code> をつくる（Haskell の場合拡張子は .hs が普通みたい）．
+<pre style="background:#000;color:#f8f8f8">
+r <span style="color:#e28964">=</span> <span style="color:#3387cc">5.0</span>
+</pre>
+Haskell さん，こう見えて whitespace sensitive なので行頭にスペースは入れないように．<br />
+なお <code>=</code> 前後のスペースはどうでも良い模様．<br />
+で，これを GHCi から読み込むときには<code>:cd</code>で cd して <code>:load</code> か <code>:l</code>で読み込む．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :load Varfun.hs 
+[1 of 1] Compiling Main             ( Varfun.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> r
+5.0
+</pre>
+という感じですね．Tab 補完も効く模様．<br />
+ghci を起動するときに引数として渡してやってもよいようだ．
+<pre style="background:#000;color:#f8f8f8">
+$ ghci Varfun.hs
+GHCi, version 7.6.2: <span style="color:#e18964;text-decoration:underline">http://www.haskell.org/ghc/</span>  :? for help
+Loading package ghc-prim ... linking ... done.
+Loading package integer-gmp ... linking ... done.
+Loading package base ... linking ... done.
+[1 of 1] Compiling Main             ( varfun.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> 
+</pre>
+変数名は小文字の英字で始めねばならず，残りは文字，数字，underscore (_), tick (') を使用できます．<br />
+他の言語なら myfoo みたいな付け方をする場合には foo' とか使うのもいいかもしれません．<br />
+そして，本来なら Haskell さんは静的格付け言語なのですが，型推論をやってくれるので今は無指定で大丈夫です．
+</p>
+<p>
+もうちょっと書き足してみよう．エディタから<code>Varfun.hs</code>を編集
+<pre style="background:#000;color:#f8f8f8">
+r <span style="color:#e28964">=</span> <span style="color:#3387cc">5</span>
+area <span style="color:#e28964">=</span> <span style="color:#dad085">pi</span>*r^<span style="color:#3387cc">2</span>
+</pre>
+で ghci から <code>:reload</code> か <code>:r</code>で読み込み（引数は不要）．<br />
+こんなかんじになるはず
+<pre style="background:#000;color:#f8f8f8">
+*Main> :r
+[1 of 1] Compiling Main             ( Varfun.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> area
+78.53981633974483
+*Main> area / r^2
+3.141592653589793
+*Main> 
+</pre>
+めでたし． <br />
+こうしてファイルから ghci に読み込むのじゃなくて， ghc でコンパイルすることも（もちろん）できます．<br />
+そのへんもまたそのうちに．そのうちにっていうか
+<pre style="background:#000;color:#f8f8f8">
+$ ghc foo.hs
+</pre>
+でいいんですけどね．
+</p>
+
+<h3>Comments</h3>
+<p>Haskell のコメントは <code>--</code> に続けて書く(LaTeX の <code>%</code>, python の <code>#</code> 相当)．
+<pre style="background:#000;color:#f8f8f8">
+x <span style="color:#e28964">=</span> <span style="color:#3387cc">5</span>     <span style="color:#aeaeae;font-style:italic">-- The variable x is 5.</span>
+y <span style="color:#e28964">=</span> <span style="color:#3387cc">6</span>     <span style="color:#aeaeae;font-style:italic">-- The variable y is 6.</span>
+<span style="color:#aeaeae;font-style:italic">-- z = 7</span>
+</pre>
+行の最後まで続かないの，あるいは複数行に渡るのは<code>{- comments -}</code>.
+<pre style="background:#000;color:#f8f8f8"> x <span style="color:#e28964">=</span> <span style="color:#aeaeae;font-style:italic">{- Don't do this just because you can. -}</span> <span style="color:#3387cc">5</span> 
+</pre>
+</p>
+
+<h3>Variables in imperative languages</h3>
+<p>
+大事なこと言います．
+<blockquote>
+Haskell では，変数の値は変化しない．
+</blockquote>
+もう一度言います．
+<blockquote><b>Variables do not vary.</b></blockquote>
+大事なことだから三回目
+<blockquote>
+<pre><big><b>
+＿人人人人人人人人人人人人＿
+＞　変数の値は変化しない　＜
+￣Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y￣
+</big></b></pre>
+</blockquote>
+<b>な，なんだってーーーーーー！！</b><br /><br />
+</p>
+<p>
+<code>DoubleDeclarations.hs</code>
+<pre style="background:#000;color:#f8f8f8">
+a <span style="color:#e28964">=</span> <span style="color:#3387cc">3</span>
+a <span style="color:#e28964">=</span> <span style="color:#3387cc">5</span>
+</pre>
+で
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :l DoubleDeclarations.hs 
+[1 of 1] Compiling Main             ( DoubleDeclarations.hs, interpreted )
+
+DoubleDeclarations.hs:2:1:
+    Multiple declarations of `a'
+    Declared at: DoubleDeclarations.hs:1:1
+                 DoubleDeclarations.hs:2:1
+Failed, modules loaded: none. 
+</pre>
+<i><code>Multiple declarations of `a'.</code></i><br />
+<code> a </code> が2回定義されてるやん，おかしいやん，って言われてしまいました．<br />
+<small>ちなみにこのように ghci のエラー表示は非常に親切かつ賢くて，丁寧に読むとかなり色々わかります，</small> <br />
+これ，命令型言語なら， 1行目で a っていう ''箱'' に 3 が入り， 2行目で 5 になる，と読むところですが，<br />
+我らが純粋関数型言語では，そうはならないわけです．数学で a = 3 って書いた時みたい．<br />
+こんなのも：
+<code> foo.hs </code> (ファイル名面倒になった)
+<pre style="background:#000;color:#f8f8f8">
+a <span style="color:#e28964">=</span> <span style="color:#3387cc">3</span>
+a <span style="color:#e28964">=</span> a<span style="color:#e28964">+</span><span style="color:#3387cc">1</span>
+</pre>
+（これが動かないだと…!!）<br />
+これは a の increment ではなく， a の再帰定義とみなされます．<br />
+</p>
+<p> 
+これで直ちに嬉しいことの一つが，変数定義の順番を気にしなくて良いこと．
+<pre style="background:#000;color:#f8f8f8">
+y <span style="color:#e28964">=</span> x*<span style="color:#3387cc">2</span>
+x <span style="color:#e28964">=</span> <span style="color:#3387cc">3</span>
+</pre>
+と
+<pre style="background:#000;color:#f8f8f8">
+x <span style="color:#e28964">=</span> <span style="color:#3387cc">3</span>
+y <span style="color:#e28964">=</span> x*<span style="color:#3387cc">2</span>
+</pre>
+は同じ．もちろん y を実際に使うときには x の値が必要になりますが，<br />
+そうして実際の特定の数値が必要になるまでは，べつに重要ではないというわけです．
+</p>
+<p>
+でもそれどうするんですか，<code> for </code>文 loop とかどうすればいいんですか．<br />
+→わくわくですよね．とにかく，ほんとにこれでうまく行くらしい． Haskell かっこいい．<br />
+<small>実は，僕が Haskell をもうちょっとやろうと思った決定的な瞬間がこのあたりだったりします．<br />
+すごくかっこよくて，すごく気持ちよさそう．もっと知りたいな，と思いました．それでいま勉強中．</small><br />
+en.wikibooks から引用：
+<blockquote><i>
+By now, you probably look very incredulous and wonder how you can actually do anything at all in Haskell where variables don't change. But trust us; as we hope to show you in the rest of this book, you can write every program under the sun without ever changing a single variable!  In fact, variables that don't change make life so much easier because it makes programs much more predictable. It's a key feature of purely functional programming, not a bug.
+</i></blockquote>
+</p>
+<h3> Functions </h3>
+<p>
+複数の円の面積を求めたい場合，
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#aeaeae;font-style:italic">-- twoareas.hs</span>
+r <span style="color:#e28964">=</span> <span style="color:#3387cc">5</span>
+area <span style="color:#e28964">=</span> <span style="color:#dad085">pi</span>*r^<span style="color:#3387cc">2</span>
+r2 <span style="color:#e28964">=</span> <span style="color:#3387cc">3</span>
+area2 <span style="color:#e28964">=</span> <span style="color:#dad085">pi</span>*r2^<span style="color:#3387cc">2</span>
+</pre>
+…なんてやるのはあまりにひどい．ここで function の出番です．<p />
+<p>
+function は argument value (or parameter) をとって，結果の値を与えるもの．<br />
+数学の函数と (Haskell でいう関数は！）一緒です．<br />
+書き方はシンプル，variable 定義するのと同じノリで，左辺に argument を書いておく．
+<pre style="background:#000;color:#f8f8f8">
+area r <span style="color:#e28964">=</span> <span style="color:#dad085">pi</span> * r^<span style="color:#3387cc">2</span> <span style="color:#aeaeae;font-style:italic">-- 数式っぽく書くなら A(r) = \pi * r^2</span>
+</pre>
+関数名，space あけて argument(s) で括弧は使わない．<br />
+特別な syntax はない． r = 5 って定義したのと同じノリで，この書き方で定義する．<br />
+</p>
+<p>
+さてではこれを call してみよう．とりあえずは ghci で読み込んで
+<pre style="background:#000;color:#f8f8f8">
+*Main> area 3
+28.274333882308138
+*Main> area 5
+78.53981633974483
+*Main> :t area
+area :: Floating a => a -> a
+</pre>
+<code> :t </code> のところ，まだ出てきてませんが type のことをやれば意味がわかるので少しお待ちを．
+</p>
+<p>
+関数では括弧は使いませんが， expressions （値を与えるあらゆる code) を纏めて一緒に評価させるときに使われます．<br />
+たとえば
+<pre style="background:#000;color:#f8f8f8">
+area (<span style="color:#3387cc">5</span><span style="color:#e28964">+</span><span style="color:#3387cc">3</span>)
+</pre>
+は最初に <code> 5+3 </code> （もちろん 8 ）を計算して，その <code> area </code> を計算します．一方
+<pre style="background:#000;color:#f8f8f8">
+area <span style="color:#3387cc">5</span> <span style="color:#e28964">+</span> <span style="color:#3387cc">3</span>
+</pre>
+ではまず <code> area 5 </code> を計算して，それに <code> 3 </code> を足すことになります．<br />
+これは掛け算が足し算より順位が高いのとおなじように， function call が先に行われるということです．<br />
+では
+<pre style="background:#000;color:#f8f8f8">
+area <span style="color:#3387cc">5</span> * <span style="color:#3387cc">3</span>
+area <span style="color:#3387cc">1</span> ^ <span style="color:#3387cc">3</span>
+</pre>
+はそれぞれどうなるでしょう．（演習課題？）
+</p>
+<p>
+せっかくだから，もうちょっと関数を書いてみよう．
+<pre style="background:#000;color:#f8f8f8">
+double x <span style="color:#e28964">=</span> <span style="color:#3387cc">2</span> * x
+quadruple x <span style="color:#e28964">=</span> double(double x)
+square x <span style="color:#e28964">=</span> x * x
+half x <span style="color:#e28964">=</span> x <span style="color:#e28964">/</span> <span style="color:#3387cc">2</span>
+</pre> 
+
+</p> 
+<h3> Evaluation </h3>
+<p>
+GHCi に expression を打ち込んだ時に何が起こるのか． <br />
+Enter 押したら ghci は打ち込んだ expression を 評価 --evaluate-- します．<br />
+これはつまり， 関数を定義で置き換え，結果を計算して，最後に値がひとつだけ残るまでそれをやる，ということ．<br />
+さっきの <code> area 5 </code> でやってみましょうか．
+<pre style="background:#000;color:#f8f8f8">
+    area <span style="color:#3387cc">5</span>
+<span style="color:#e28964">=></span>   <span style="color:#aeaeae;font-style:italic">{- 定義の area r = を 右辺の pi * r^2 で置き換え-}</span>
+    <span style="color:#dad085">pi</span> * <span style="color:#3387cc">5</span>^<span style="color:#3387cc">2</span>
+<span style="color:#e28964">=></span> <span style="color:#aeaeae;font-style:italic">{- pi を数値に置き換え-}</span>
+    <span style="color:#3387cc">3.141592653589793</span> * <span style="color:#3387cc">5</span>^<span style="color:#3387cc">2</span>
+<span style="color:#e28964">=></span> <span style="color:#aeaeae;font-style:italic">{- 指数(^)を適用 -}</span>
+    <span style="color:#3387cc">3.141592653589793</span> * <span style="color:#3387cc">25</span>
+<span style="color:#e28964">=></span> <span style="color:#aeaeae;font-style:italic">{- 掛け算 -}</span>
+    <span style="color:#3387cc">78.53981633974483</span>
+</pre>
+あ，別に <code> => </code> は Haskell さん的なアレじゃないよ．
+</p>
+<p>
+練習問題．
+<ul>
+	<li> 少し前の <code> quadruple 5 </code> は ghci さんにどう評価されるか．再掲すると
+<pre style="background:#000;color:#f8f8f8">
+double x <span style="color:#e28964">=</span> <span style="color:#3387cc">2</span> * x
+quadruple x  <span style="color:#e28964">=</span> double(double x)
+</pre>
+	</li>
+	<li>引数の半分から 12 を引く関数書いてみよう．</li>
+</ul>
+</p>
+<h3> Multiple parameters </h3>
+<p>
+もちろん引数は一つとは限らないよー．縦と横与えられて長方形の面積：
+<pre style="background:#000;color:#f8f8f8">
+areaRect l w <span style="color:#e28964">=</span> l * w
+</pre>
+で
+<pre style="background:#000;color:#f8f8f8">
+*Main> areaRect 5 10
+50
+</pre>
+直角三角形の面積求めるぜ
+<pre style="background:#000;color:#f8f8f8">
+areaRightTriangle b h <span style="color:#e28964">=</span> (b * h) <span style="color:#e28964">/</span><span style="color:#3387cc">2</span>
+</pre>
+使うときはこんなかんじに引数同士をスペースで区切る．<br />
+だから括弧使わないと誤解が生じることもあるわけですねー．
+<pre style="background:#000;color:#f8f8f8">
+quadruple x <span style="color:#e28964">=</span> double double x
+</pre>
+と，書くとします．実は関数も他の関数の引数になれちゃうので誤解が起きる．<br />
+関数を関数に投げる話はまた後でするとして，とりあえずちゃんと誤解を解くために
+<pre style="background:#000;color:#f8f8f8">
+quadruple x <span style="color:#e28964">=</span> double (double x)
+</pre>
+としませう．<br />
+一応確認しとくと順番は書いてあるままです．
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#dad085">subtract</span> x y <span style="color:#e28964">=</span> x <span style="color:#e28964">-</span> y
+</pre>
+なら<code> subtract 10 5 </code> は <code> 5 </code>, <code> subtract 5 10 </code> は <code> -5.</code>
+なおいままで何の気無しに使ってた <code>+</code> とかも関数で，<code> (+) </code> と書くと本来の関数としての syntax で使えます．
+Couldn't load grammar file: Plain Text\
+
+演習．
+<ul>
+	<li>直方体の体積出す関数書いてみよう．</li>
+	<li>Giza のピラミッドって大体どのくらいの数の石でできてるだろう？ GHCi さんの助けを借りて計算してみよう．</li>
+</ul>
+</p>
+<p>
+関数使って関数作るのももちろんできるよ<br />
+長方形と正方形の面積求めるもの
+<pre style="background:#000;color:#f8f8f8">
+areaRect l w <span style="color:#e28964">=</span> l * w
+areaSquare s <span style="color:#e28964">=</span> areaRect s s
+</pre>
+こういうのできるの，後々わかってくるけど超便利．<br />
+演習．
+<ul>
+<li> 円柱の体積求める関数書いてみよう．</li>
+</ul>
+</p>
+<h2> Local definitions </h2>
+<h3> <code>where</code> clauses </h3>
+その関数の中でしか使わへんようなやつをいちいちきちんと定義するのもアレなので．<br />
+Heron の公式 ($ A = \sqrt{s (s-a) (s-b) (s-c)} $ where $ s = (a+b+c)/2 $) 
+<pre style="background:#000;color:#f8f8f8">
+heron a b c <span style="color:#e28964">=</span> <span style="color:#dad085">sqrt</span> ( s*(s<span style="color:#e28964">-</span>a)*(s<span style="color:#e28964">-</span>b)*(s<span style="color:#e28964">-</span>c) )
+    <span style="color:#e28964">where</span> 
+    s <span style="color:#e28964">=</span> (a<span style="color:#e28964">+</span>b<span style="color:#e28964">+</span>c) <span style="color:#e28964">/</span> <span style="color:#3387cc">2</span>
+</pre>
