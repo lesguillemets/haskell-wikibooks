@@ -528,3 +528,57 @@ x /= y = not (x == y)
 </code>
 というかんじ（この書き方で完全に正しい）．
 <h3> Guards </h3>
+<p>
+絶対値を吐く関数を書いてみましょう．Haskell に <code>abs</code> 関数があるので自分で書かなくてもいいんですが．<br />
+書きたいのは，数式で書くと
+<pre>
+|x| =  x    if x >= 0
+      -x    if x <  0
+</pre>
+ってこと．<br />
+</p>
+<p>
+さて Haskell で書くでーーーー！<br />
+<code Haskell>
+myabs x
+      |  x < 0      = 0 - x
+      |  otherwise  = x
+</code>
+大変読みやすくまとまっております．
+<ul>
+<li>まず普通に書き始めて</li>
+<li><code>=</code> 書かずに改行，インデントを置いて（これは文法上必要）場合分けを書く．</li>
+<ul><li>場合分けは <code>|</code> に続けて，Bool 値を返す expression, <code>=</code> とその場合の右辺の順．<li>
+<li>それぞれが guard と呼ばれるらしいぜ！</li>
+<li>otherwise は otherwise. 別になくても構わない．さっきので言えば <code>x<=0</code> で書いてもよかった．<br />
+けどどれも True にならなかったら runtime error になるから使っといたほうがいい．</ul>
+</ul>
+</p>
+<p>
+注意点．
+<ul>
+<li> <code>otherwise</code> 格好いいけど実は
+<code Haskell>
+otherwise = True
+</code>
+って定義されてるだけらしい．賢いな．でもだから最後に置かなあかんよ．</li>
+<li>
+わざわざ <code>0 - x</code> って書いたけど，この場合は関数としてやなくてあくまで記法上の簡略化として 
+<code> -x </code> とだけ書いてもよかった．ただ <code> 3 - -5</code> みたいな書き方は括弧なしでは通らないので気をつけよう．
+</li>
+</ul>
+</p>
+<h4> <code>where</code> and Guards </h4>
+<p>
+<code>where</code> と guard の組み合わせは使いやすい．<br />
+二次方程式 ax^2 + bx + c = 0 の解の個数
+<code Haskell>
+numOfSolutions a b c 
+    | disc > 0  = 2
+    | disc == 0 = 1
+    | otherwise = 0
+        where 
+        disc = b^2 - 4*a*c
+</code>
+ここで <code>where</code> の scope は guard 全部の下に入ってるってことらしい．
+</p>
