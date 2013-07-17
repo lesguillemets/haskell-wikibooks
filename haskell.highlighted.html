@@ -547,11 +547,11 @@ myabs x
 大変読みやすくまとまっております．
 <ul>
 <li>まず普通に書き始めて</li>
-<li><code>=</code> 書かずに改行，インデントを置いて（これは文法上必要）場合分けを書く．</li>
+<li><code>=</code> 書かずに改行，インデントを置いて（これは文法上必要）場合分けを書く．
 <ul><li>場合分けは <code>|</code> に続けて，Bool 値を返す expression, <code>=</code> とその場合の右辺の順．<li>
 <li>それぞれが guard と呼ばれるらしいぜ！</li>
 <li>otherwise は otherwise. 別になくても構わない．さっきので言えば <code>x<=0</code> で書いてもよかった．<br />
-けどどれも True にならなかったら runtime error になるから使っといたほうがいい．</ul>
+けどどれも True にならなかったら runtime error になるから使っといたほうがいい．</ul></li>
 </ul>
 </p>
 <p>
@@ -750,3 +750,80 @@ signature なかったらそのまま変な型推論して妙なところで err
 コンパイルの段階で「なんか変ﾀﾞﾖｰ」ってなって，コンパイルさえ通ればまあちゃんと動くぜって感じみたい． すごい．
 </p>
 <h2> Lists and tuples </h2>
+list と tuple のお話．
+<h3> Lists </h3>
+<p>
+list の書き方：
+<pre style="background:#000;color:#f8f8f8">
+numbers <span style="color:#e28964">=</span> [<span style="color:#3387cc">1</span>,<span style="color:#3387cc">2</span>,<span style="color:#3387cc">3</span>,<span style="color:#3387cc">86</span>]
+strings <span style="color:#e28964">=</span> [<span style="color:#65b042">"here"</span>, <span style="color:#65b042">"are"</span>, <span style="color:#65b042">"some"</span>, <span style="color:#65b042">"strings"</span>]
+bools <span style="color:#e28964">=</span> [<span style="color:#cf6a4c">True</span>, <span style="color:#cf6a4c">False</span>, <span style="color:#cf6a4c">True</span>, <span style="color:#cf6a4c">False</span>]
+</pre>
+<ul>
+<li>同じ type のものだけを集められます（異なる type をまとめようとすると type error:
+<pre style="background:#000;color:#f8f8f8">
+Prelude> let thisdoesntwork = [2, 'a']
+
+&lt;interactive>:5:23:
+    No instance for (Num Char) arising from the literal `2'
+    Possible fix: add an instance declaration for (Num Char)
+    In the expression: 2
+    In the expression: [2, 'a']
+    In an equation for `thisdoesntwork': thisdoesntwork = [2, 'a']
+</pre></li>
+<li> <code>(足すもの):(list)</code>という記法で要素を足した list を手に入れることができます(このことを cons (<i>verb</i>) というらしい)．この時の evaluation は右から左に行われ，好きなだけつなげて行けます．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> let numbers = [1,2,3,1,4]
+Prelude> 1:numbers
+[1,1,2,3,1,4]
+Prelude> 1:0:4:numbers
+[1,0,4,1,2,3,1,4]
+Prelude> numbers:numbers
+
+&lt;interactive>:5:9:
+    Couldn't match type `Integer' with `[Integer]'
+    Expected type: [[Integer]]
+      Actual type: [Integer]
+    In the second argument of `(:)', namely `numbers'
+    In the expression: numbers : numbers
+    In an equation for `it': it = numbers : numbers
+</pre>
+っていう感じ．
+<ul>
+<li>ほんま言うと <code>[1,2,3]</code> っていうの自体も <code>1:2:3:[]</code> の syntax sugar. 最後の <code>[]</code> 忘れないように．</li>
+<li><code>(:)</code> も例によって関数．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t (:)
+(:) :: a -> [a] -> [a]
+</pre>
+<li>前言った通り String は Char の list なので，
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 't':"here"
+"there"
+Prelude> "me" == ['m','e']
+True
+</pre>
+</ul></li>
+<li>あれ，それなら <code>[]</code> の type ってなんなんだろう．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t []
+[] :: [a]
+</pre>
+Haskell 「なんかわからんけどなんかのリストや」<br />
+なるほど．</li>
+<li>型さえ揃ってれば何でもいいので，（型が同じ） list の list も作れます．
+<pre style="background:#000;color:#f8f8f8">
+listOfLists <span style="color:#e28964">=</span> [ [<span style="color:#3387cc">1</span>,<span style="color:#3387cc">2</span>], [<span style="color:#3387cc">3</span>,<span style="color:#3387cc">4</span>], [<span style="color:#3387cc">5</span>,<span style="color:#3387cc">6</span>,<span style="color:#3387cc">7</span>]]
+anotherList <span style="color:#e28964">=</span> <span style="color:#3387cc">[]</span><span style="color:#e28964">:</span>[<span style="color:#3387cc">1</span>]<span style="color:#e28964">:</span><span style="color:#3387cc">[]</span><span style="color:#e28964">:</span><span style="color:#3387cc">[]</span>
+</pre>
+でもこんなのはだめよ
+<pre style="background:#000;color:#f8f8f8">
+lol  <span style="color:#e28964">=</span> [ <span style="color:#3387cc">1</span>, [<span style="color:#3387cc">1</span>,<span style="color:#3387cc">2</span>]]
+lol2 <span style="color:#e28964">=</span> [ [<span style="color:#65b042">'a'</span>], [<span style="color:#3387cc">2</span>] ]
+</pre>
+</ul> 
+</p>
+<p>
+練習問題．はまあ省略でいいわ．
+</p>
+<h3> Tuples </h3>

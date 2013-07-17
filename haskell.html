@@ -547,11 +547,11 @@ myabs x
 大変読みやすくまとまっております．
 <ul>
 <li>まず普通に書き始めて</li>
-<li><code>=</code> 書かずに改行，インデントを置いて（これは文法上必要）場合分けを書く．</li>
+<li><code>=</code> 書かずに改行，インデントを置いて（これは文法上必要）場合分けを書く．
 <ul><li>場合分けは <code>|</code> に続けて，Bool 値を返す expression, <code>=</code> とその場合の右辺の順．<li>
 <li>それぞれが guard と呼ばれるらしいぜ！</li>
 <li>otherwise は otherwise. 別になくても構わない．さっきので言えば <code>x<=0</code> で書いてもよかった．<br />
-けどどれも True にならなかったら runtime error になるから使っといたほうがいい．</ul>
+けどどれも True にならなかったら runtime error になるから使っといたほうがいい．</ul></li>
 </ul>
 </p>
 <p>
@@ -750,3 +750,80 @@ signature なかったらそのまま変な型推論して妙なところで err
 コンパイルの段階で「なんか変ﾀﾞﾖｰ」ってなって，コンパイルさえ通ればまあちゃんと動くぜって感じみたい． すごい．
 </p>
 <h2> Lists and tuples </h2>
+list と tuple のお話．
+<h3> Lists </h3>
+<p>
+list の書き方：
+<code Haskell>
+numbers = [1,2,3,86]
+strings = ["here", "are", "some", "strings"]
+bools = [True, False, True, False]
+</code>
+<ul>
+<li>同じ type のものだけを集められます（異なる type をまとめようとすると type error:
+<code Plain Text>
+Prelude> let thisdoesntwork = [2, 'a']
+
+<interactive>:5:23:
+    No instance for (Num Char) arising from the literal `2'
+    Possible fix: add an instance declaration for (Num Char)
+    In the expression: 2
+    In the expression: [2, 'a']
+    In an equation for `thisdoesntwork': thisdoesntwork = [2, 'a']
+</code></li>
+<li> <code>(足すもの):(list)</code>という記法で要素を足した list を手に入れることができます(このことを cons (<i>verb</i>) というらしい)．この時の evaluation は右から左に行われ，好きなだけつなげて行けます．
+<code Plain Text>
+Prelude> let numbers = [1,2,3,1,4]
+Prelude> 1:numbers
+[1,1,2,3,1,4]
+Prelude> 1:0:4:numbers
+[1,0,4,1,2,3,1,4]
+Prelude> numbers:numbers
+
+<interactive>:5:9:
+    Couldn't match type `Integer' with `[Integer]'
+    Expected type: [[Integer]]
+      Actual type: [Integer]
+    In the second argument of `(:)', namely `numbers'
+    In the expression: numbers : numbers
+    In an equation for `it': it = numbers : numbers
+</code>
+っていう感じ．
+<ul>
+<li>ほんま言うと <code>[1,2,3]</code> っていうの自体も <code>1:2:3:[]</code> の syntax sugar. 最後の <code>[]</code> 忘れないように．</li>
+<li><code>(:)</code> も例によって関数．
+<code Plain Text>
+Prelude> :t (:)
+(:) :: a -> [a] -> [a]
+</code>
+<li>前言った通り String は Char の list なので，
+<code Plain Text>
+Prelude> 't':"here"
+"there"
+Prelude> "me" == ['m','e']
+True
+</code>
+</ul></li>
+<li>あれ，それなら <code>[]</code> の type ってなんなんだろう．
+<code Plain Text>
+Prelude> :t []
+[] :: [a]
+</code>
+Haskell 「なんかわからんけどなんかのリストや」<br />
+なるほど．</li>
+<li>型さえ揃ってれば何でもいいので，（型が同じ） list の list も作れます．
+<code Haskell>
+listOfLists = [ [1,2], [3,4], [5,6,7]]
+anotherList = []:[1]:[]:[]
+</code>
+でもこんなのはだめよ
+<code Haskell>
+lol  = [ 1, [1,2]]
+lol2 = [ ['a'], [2] ]
+</code>
+</ul> 
+</p>
+<p>
+練習問題．はまあ省略でいいわ．
+</p>
+<h3> Tuples </h3>
