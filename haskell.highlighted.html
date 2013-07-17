@@ -582,3 +582,171 @@ numOfSolutions a b c
 </pre>
 ここで <code>where</code> の scope は guard 全部の下に入ってるってことらしい．
 </p>
+
+<h2> Type Basics!!!!!!!!!!! </h2>
+ｳｯﾋｮｵｵｵｵｵｵｵｵｵｵｵｵｵｵｵｵｵｵ type ﾀﾞｱｱｱｱｱｱｱｱｱ<br />
+<p>
+…コホン．
+<ul>
+<li>Haskell での型は大文字から始まる．String が string. 自分で型作るのもできるぜ </li>
+<li>例えば電話番号とかは，もちろん普通の数として扱ってもいいけど，
+<code>TelephoneNumber</code> みたいな型として見たほうが情報をたくさん得られたり，要らん混乱を弾いたりできそう．</li>
+<li> ghci で <code>:t</code> ないし <code>:type</code> コマンド使ったらどの type か教えてくれるぜ！</li>
+</ul>
+</p>
+<p>
+というわけで :t やってみるぞー！！<br />
+</p>
+<p>
+いろんな値
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t True
+True :: Bool
+Prelude> :t (3 &lt; 2)
+(3 &lt; 2) :: Bool
+Prelude> :t 'a'
+'a' :: Char
+Prelude> :t "a"
+"a" :: [Char]
+Prelude> :t 'ab'
+
+&lt;interactive>:1:1:
+    Syntax error on 'ab'
+    Perhaps you intended to use -XTemplateHaskell
+Prelude> :t "ab"
+"ab" :: [Char]
+Prelude> :t 31
+31 :: Num a => a
+Prelude> :t 3.2
+3.2 :: Fractional a => a
+Prelude> :t (2/3)
+(2/3) :: Fractional a => a
+</pre>
+<code> Fractional a => a</code>とかはあとで．a は Fractional やでっていう束縛みたいなもの．<br />
+<code>String</code> は <code>[Char]</code> のこと（どっちでも書いてもいい）で，<br />
+<code>[Char]</code> は <code>Char</code> の list のこと．<br />
+</p>
+<p>
+関数とか．引数が複数あるときは<code>甲 :: (引数1)->(引数2)->..->(引数n)->(返り値）</code> と表す．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t not
+not :: Bool -> Bool
+Prelude> :t (+)
+(+) :: Num a => a -> a -> a
+Prelude> :t (/)
+(/) :: Fractional a => a -> a -> a
+Prelude> :t (^)
+(^) :: (Integral b, Num a) => a -> b -> a
+Prelude> :t (**)
+(**) :: Floating a => a -> a -> a
+Prelude> :t ^ --ちなみにこれは
+&lt;interactive>:1:1: parse error on input `^'
+Prelude> let areaRect x y = x * y
+Prelude> :t areaRect -- 自分では型指定してないけど推論してくれてる
+areaRect :: Num a => a -> a -> a
+</pre>
+アレやで， <code>1 + </code> とかも関数やで
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t (3&lt;)
+(3&lt;) :: (Num a, Ord a) => a -> Bool
+Prelude> :t (1+)
+(1+) :: Num a => a -> a
+</pre>
+<p>
+この <code>::</code> は type signature と言われ，自分で型宣言するときもこうすればよい．<br />
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">a</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">Integer</span>
+a <span style="color:#e28964">=</span> <span style="color:#3387cc">3</span>
+<span style="color:#89bdff">mynot</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">Bool</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Bool</span>
+mynot arg
+    <span style="color:#e28964">|</span> arg        <span style="color:#e28964">=</span> <span style="color:#cf6a4c">False</span>
+    <span style="color:#e28964">|</span> <span style="color:#dad085">otherwise</span>  <span style="color:#e28964">=</span> <span style="color:#cf6a4c">True</span>
+</pre>
+的な．複数同じ型を持ってる場合は <code>a,b :: (type)</code> ってまとめてかけるぜ．
+</p>
+<p>
+具体例を考えてみようか．<code>chr</code> と <code>ord</code>, ASCII な感じの番号と文字の相互変換．<br />
+これを使うには <code>Data.Char</code> を import する． ghci からなら
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :m Data.Char 
+</pre>
+(または <code>:module</code>) で import して
+<pre style="background:#000;color:#f8f8f8">
+Prelude Data.Char> chr 97
+'a'
+Prelude Data.Char> chr 96
+'`'
+Prelude Data.Char> ord 'm'
+109
+</pre>
+.hs 書くなら
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#e28964">import</span> <span style="color:#9b859d">Data.Char</span>
+</pre>
+python みたいに <code>Data.Char.chr(97)</code> とはしない．これの型は
+<pre style="background:#000;color:#f8f8f8">
+chr :: Int -> Char
+ord :: Char -> Int
+</pre>
+</p>
+<p>
+<code>xor</code> とか書いてみるか．
+<pre style="background:#000;color:#f8f8f8">
+xor p q <span style="color:#e28964">=</span> (p <span style="color:#e28964">||</span> q) &amp;&amp; <span style="color:#dad085">not</span> (p &amp;&amp; q)
+</pre>
+Bool と Bool で Bool 返すので
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :l xor.hs 
+[1 of 1] Compiling Main             ( xor.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> :t xor
+xor :: Bool -> Bool -> Bool
+*Main> 
+</pre>
+</p>
+<p>
+もうちょっと現実的っぽい例を．GUI で使うような，ウィンドウ開くやつ．<br />
+ちょっと簡略化してるけどイメージ的には
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">openWindow</span> <span style="color:#e28964">::</span> <span style="color:#99cf50">WindowTitle</span> <span style="color:#e28964">-></span> <span style="color:#99cf50">WindowSize</span> <span style="color:#e28964">-></span> <span style="color:#99cf50">Window</span>
+</pre>
+ね，分かりやすそうやん．とりあえずこれからも <code>:t</code> は常に使って行きましょう．
+</p>
+<p>
+練習問題．それぞれ型はどうかけるでしょう．
+<ol>
+<li>関数 <code>negate</code>, Int を受け取ってその符号を逆にしたのを返す．<code>negate 3 = -3, negate -3 = 3</code> など．</li>
+<li>関数 <code>(||)</code>. </li>
+<li><code>monthLength</code>. うるう年かどうかの Bool と月を表す Int からその月の日の数を返す．</li>
+<li><code>f x y = not x && y</code></li>
+<li><code>g x = (2*x - 1)ˆ2</code>. 数は Int.</li>
+</ol>
+</p>
+
+<h3> Type Inference</h3>
+<p>
+type signature を僕らが書かなくても ghci とか ghc はわかってくれる，のは，<br />
+type inference, 型推論ってのをやってくれるから．流れはこんな感じ．
+<pre style="background:#000;color:#f8f8f8">
+isL c <span style="color:#e28964">=</span> c <span style="color:#e28964">==</span> <span style="color:#65b042">'l'</span>
+</pre>
+type signature 無しに書いてみる．ちゃんとこれでも
+<pre style="background:#000;color:#f8f8f8">
+:t isL
+isL :: Char -> Bool
+</pre>
+とわかってくれてるわけ．<br />
+<ul>
+<li>まず 'l' は Char.</li>
+<li>となるとそれと <code>(==)</code> で比べられるためには c は Char じゃないとね</li>
+<li>最後に帰ってくるのは Bool だよね</li>
+</ul>
+って感じですね．<br />
+とはいえコードの読みやすさとか，バグ取りのこととか考えると type signature は積極的にしていこう．<br />
+たとえば typo とかしても， type signature をしといたら弾けることも多いけど，<br />
+signature なかったらそのまま変な型推論して妙なところで error でるかもしれないよね．<br />
+それに関数名と type signature 見たらだいたい何するかわかったりもするし．<br />
+このへんの事のおかげで，Haskell では「コンパイルは通ったけど動かしてみたら変な感じ」ってことは少なくて，<br />
+コンパイルの段階で「なんか変ﾀﾞﾖｰ」ってなって，コンパイルさえ通ればまあちゃんと動くぜって感じみたい． すごい．
+</p>
+<h2> Lists and tuples </h2>
