@@ -827,3 +827,48 @@ lol2 <span style="color:#e28964">=</span> [ [<span style="color:#65b042">'a'</sp
 練習問題．はまあ省略でいいわ．
 </p>
 <h3> Tuples </h3>
+<p>
+Tuples の書き方：
+<pre style="background:#000;color:#f8f8f8">
+tuple1 <span style="color:#e28964">=</span> (<span style="color:#3387cc">1</span>,<span style="color:#3387cc">3.3</span>)
+tuple2 <span style="color:#e28964">=</span> (<span style="color:#cf6a4c">True</span>, <span style="color:#3387cc">3</span>)
+tuple3 <span style="color:#e28964">=</span> (<span style="color:#3387cc">4</span>, <span style="color:#3387cc">5</span>, <span style="color:#65b042">"Six"</span>, <span style="color:#cf6a4c">True</span>, <span style="color:#65b042">'b'</span>)
+tuple4 <span style="color:#e28964">=</span> ((<span style="color:#3387cc">2</span>,<span style="color:#3387cc">3</span>), [<span style="color:#3387cc">2</span>,<span style="color:#3387cc">3</span>])
+</pre>
+Tuple は
+<ul>
+<li>要素の数は変更できない (immutable). <code>(:)</code> で cons することも従ってできない．
+<ul><li>だから座標を表すのとかにいいかも．</li>
+<li>要素の数 n に対して一般には n-tuple. 2 の時は pair, 3の時は triple ということが多い．一応それ以降は quadruples, quintuples と続く．tuple の名はここから．</ul>
+</li>
+<li>要素の型がそろってなくてもいい．
+<ul><li>電話帳とかにいいかも．</li></ul></li>
+</ul></p>
+<p>
+補足事項
+<ul>
+<li>関数のとる値とかがこれになるようにしとくと複数の値を返す相当だぜ</li>
+<li>マスターいつもの
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t ('a', True)
+('a', True) :: (Char, Bool)
+Prelude> :t ()
+() :: ()
+</pre>
+前者からわかるとおり，<code>('a', True)</code> と <code>(True, 'a')</code> は type が別になるので注意．
+</li>
+</ul>
+</p>
+<p>
+というわけで tuple と list をそれぞれ入れ子にしたりできる．
+<pre style="background:#000;color:#f8f8f8">
+((<span style="color:#3387cc">2</span>,<span style="color:#3387cc">3</span>), <span style="color:#cf6a4c">True</span>)
+((<span style="color:#3387cc">2</span>,<span style="color:#3387cc">3</span>), [<span style="color:#3387cc">2</span>,<span style="color:#3387cc">3</span>])
+[(<span style="color:#3387cc">1</span>,<span style="color:#3387cc">2</span>), (<span style="color:#3387cc">3</span>,<span style="color:#3387cc">4</span>), (<span style="color:#3387cc">5</span>,<span style="color:#3387cc">6</span>)]
+</pre>
+たとえば
+<pre style="background:#000;color:#f8f8f8">
+[(<span style="color:#3387cc">1</span>,<span style="color:#3387cc">2</span>),(<span style="color:#3387cc">3</span>,<span style="color:#3387cc">4</span>,<span style="color:#3387cc">5</span>)]
+</pre>
+は通りませんで．
+<h3> Retrieving Values </h3>

@@ -827,3 +827,48 @@ lol2 = [ ['a'], [2] ]
 練習問題．はまあ省略でいいわ．
 </p>
 <h3> Tuples </h3>
+<p>
+Tuples の書き方：
+<code Haskell>
+tuple1 = (1,3.3)
+tuple2 = (True, 3)
+tuple3 = (4, 5, "Six", True, 'b')
+tuple4 = ((2,3), [2,3])
+</code>
+Tuple は
+<ul>
+<li>要素の数は変更できない (immutable). <code>(:)</code> で cons することも従ってできない．
+<ul><li>だから座標を表すのとかにいいかも．</li>
+<li>要素の数 n に対して一般には n-tuple. 2 の時は pair, 3の時は triple ということが多い．一応それ以降は quadruples, quintuples と続く．tuple の名はここから．</ul>
+</li>
+<li>要素の型がそろってなくてもいい．
+<ul><li>電話帳とかにいいかも．</li></ul></li>
+</ul></p>
+<p>
+補足事項
+<ul>
+<li>関数のとる値とかがこれになるようにしとくと複数の値を返す相当だぜ</li>
+<li>マスターいつもの
+<code Plain Text>
+Prelude> :t ('a', True)
+('a', True) :: (Char, Bool)
+Prelude> :t ()
+() :: ()
+</code>
+前者からわかるとおり，<code>('a', True)</code> と <code>(True, 'a')</code> は type が別になるので注意．
+</li>
+</ul>
+</p>
+<p>
+というわけで tuple と list をそれぞれ入れ子にしたりできる．
+<code Haskell>
+((2,3), True)
+((2,3), [2,3])
+[(1,2), (3,4), (5,6)]
+</code>
+たとえば
+<code Haskell>
+[(1,2),(3,4,5)]
+</code>
+は通りませんで．
+<h3> Retrieving Values </h3>
