@@ -871,4 +871,61 @@ Prelude> :t ()
 [(<span style="color:#3387cc">1</span>,<span style="color:#3387cc">2</span>),(<span style="color:#3387cc">3</span>,<span style="color:#3387cc">4</span>,<span style="color:#3387cc">5</span>)]
 </pre>
 は通りませんで．
+</p>
 <h3> Retrieving Values </h3>
+<p>
+list とか tuple 作ったんだからそこから要素引き出したいぜ！<br />
+っていう話なんやけど，ちょっと準備の必要な話でもあるので，まずは単純なやつだけ．<br />
+いずれにしても割と気持ち悪いぜ！
+<ul>
+<li>list. <code>head</code> がリストの頭を，<code>tail</code> がそれ以降の部分を返す．正確にいうならそういう写像．<br />
+これ，<code>(:)</code> で繋いだのの端っこを切ることでできている．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> head [2,5,3,6]
+2
+Prelude> tail [2,5,3,6]
+[5,3,6]
+Prelude> head (2:5:3:6:[])
+2
+Prelude> head "there"
+'t'
+Prelude> tail "there"
+"here"
+Prelude> tail "t"
+""
+Prelude> tail [1]
+[]
+Prelude> tail []
+*** Exception: Prelude.tail: empty list
+Prelude> head []
+*** Exception: Prelude.head: empty list
+</pre>
+<code>tail [1]</code> が <code>[]</code> になるのは <code>[1]</code> が <code>1:[]</code> だから，かな． </li>
+<li>pair (要素2つの tuple) : <code>fst</code> で 1つめの要素を，<code>snd</code> で 2つめの要素を取得．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> fst (2,5)
+2
+Prelude> fst (True,"noo")
+True
+Prelude> fst( snd ( (True, 3), (2,"there")))
+2
+Prelude> fst (2,3,1)
+
+&lt;interactive>:5:5:
+    Couldn't match expected type `(a0, b0)'
+                with actual type `(t0, t1, t2)'
+    In the first argument of `fst', namely `(2, 3, 1)'
+    In the expression: fst (2, 3, 1)
+    In an equation for `it': it = fst (2, 3, 1)
+</pre>
+pair にしかこれは使えないんだ，すまない．（<code>(2,3)</code> と <code>(2,3,4)</code> では type が違うからね）
+</li>
+</ul>
+</p>
+<p>練習問題．
+<ol>
+<li><code>( ("Hello", 4), True)</code> から 4 を取り出してみよう．</li>
+<li>tuple で list の 頭と残りを返す関数書いてみよう．</li>
+<li><code>head</code> と <code>tail</code> で list の 5番目の要素を返す関数を書いてみよう．どこかどう面倒くさいか考えておこう．
+</ol>
+</p>
