@@ -136,7 +136,8 @@ Ok, modules loaded: Main.
 </code>
 変数名は小文字の英字で始めねばならず，残りは文字，数字，underscore (_), tick (') を使用できます．<br />
 他の言語なら myfoo みたいな付け方をする場合には foo' とか使うのもいいかもしれません．<br />
-そして，本来なら Haskell さんは静的格付け言語なのですが，型推論をやってくれるので今は無指定で大丈夫です．
+そして，本来なら Haskell さんは静的型付け言語なのですが，型推論をやってくれるので今は無指定で大丈夫です．<br />
+(python みたいに動的型付けなのではなくて，向こうが適切に推論して型を振ってくれる，ということ）．
 </p>
 <p>
 もうちょっと書き足してみよう．エディタから<code>Varfun.hs</code>を編集
@@ -928,4 +929,51 @@ pair にしかこれは使えないんだ，すまない．（<code>(2,3)</code>
 <li>tuple で list の 頭と残りを返す関数書いてみよう．</li>
 <li><code>head</code> と <code>tail</code> で list の 5番目の要素を返す関数を書いてみよう．どこかどう面倒くさいか考えておこう．
 </ol>
+</p>
+<h3> polymorphic types </h3>
+<p>
+さて，
+<code Haskell>
+[True, False, True]
+['a', 'b']
+["hey", "may"]
+</code>
+それぞれ型が違います．最初のは <code>[Bool]</code>, 続いて <code>[Char]</code>, さらに <code>[[Char]]</code>.<br />
+ほんで，これまでやってきた通り，関数が受け取れる型っていうのは予め決まってるわけ． <br />
+と，いうことは．例えば list の長さが欲しい時には，<br />
+<code>lengthBools :: [Bool] -> Int</code> とか <code>lengthChars :: [Char] -> Int</code> とか色々必要，<br />
+というのはあまりに面倒というか理不尽．実際にはひとつの関数 <code>length</code> が対応してくれるのでこれの型を見てみましょう．
+<code Plain Text>
+Prelude> :t length
+length :: [a] -> Int
+</code>
+この <code>a</code> っていうのは型じゃない（そもそも型は大文字から始まる）．<br />
+これが type variable, 型変数と呼ばれるもので，ここにはどんな型でも入ってよい．<br />
+つまるところこの <code>[a]</code> という型表示は，<code>Bool</code> <code>[[Char]]</code> その他，何でもいいからそれのリスト，ってこと．
+こういうふうに複数の型を（同時にではないが）許容するのは type theory の用語で polymorphism というらしい．<br />
+形容詞系は polymorphic, 対義語は monomorphic.<br />
+ここで気をつけるべきは，ひとつの type signature の中では同じ型変数には同じ型が入るということ．<br />
+ふつうの変数と同じですね．例えば，
+<code Haskell>
+f :: a -> a
+</code>
+という時にはなんの型でもいいから受け取って同じ型で返す関数を表わしてて，
+<code Haskell>
+f :: a -> b
+</code>
+という時には <code>a</code> と <code>b</code> は同じかもしれないし違うかもしれない．
+</p>
+<p>
+というわけで早速具体例を見てみよう．そろそろ何を見ても「型はどうなってるかな」と気になる頃．
+さっきやった <code>fst</code> と <code>snd</code> はどうなるだろうか（もちろんまず自分で考えて）．
+<code Plain Text>
+Prelude> :t fst
+fst :: (a, b) -> a
+Prelude> :t snd
+snd :: (a, b) -> b
+</code>
+すっきり．<code>head</code> と <code>tail</code> とかも各自．
+</p>
+<p>
+練習問題
 </p>
