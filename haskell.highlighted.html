@@ -976,4 +976,98 @@ snd :: (a, b) -> b
 </p>
 <p>
 練習問題
+<ol>
+<li>前の
+<ol>
+<li><code>( ("Hello", 4), True)</code> から 4 を取り出してみよう．</li>
+<li>tuple で list の 頭と残りを返す関数書いてみよう．</li>
+</ol>の型</li>
+<li><code>h x y z = chr (x-2)</code> の型は？ (試すときは<code>:m</code> か <code>import</code> 忘れずに）</li>
+</ol>
 </p>
+<p>
+練習問題のあれ
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :m Data.Char
+Prelude Data.Char> let h x y z =  chr (x-2)
+Prelude Data.Char> :t h
+h :: Int -> t -> t1 -> Char
+</pre>
+この <code>t</code> とか <code>t1</code> とかでどのアルファベットを選ぶかってなんか決まりあるんだろうか．
+</p>
+<h2> Type Basics II </h2>
+<h3> Typeclass </h3>
+<p>
+さてさて，これまでぼんやりとしか喋ってこなかったけれども，例えば <code>(+)</code> の type はどうあるべきか．<br />
+アレやん， <code>Int</code> 同士の足し算ならいいけどさ， <code>Float</code> とかも自在に扱って欲しいわけ．<br />
+かといって <code>Char</code> と <code>Int</code> を勝手に足されても困る．<br />
+たとえば <code>Number</code> みたいな型があって，それで数全部を扱ってしまえれば嬉しい：
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">(+)</span> <span style="color:#e28964">::</span> <span style="color:#99cf50">Number</span> <span style="color:#e28964">-></span> <span style="color:#99cf50">Number</span> <span style="color:#e28964">-></span> <span style="color:#99cf50">Number</span>
+</pre>
+せやけど，例えば浮動小数点型と整数型は区別せな色々困るわけで，これはやっぱり望み薄．<br />
+先程の type variable の概念を援用し，たいところだが，そのままだと数以外のものの足し算も許容してしまう．<br />
+というわけで… clever にも，「数を表す型ならなんでもおｋ」な型変数みたいな指定ができるのです！
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">(+)</span> <span style="color:#e28964">::</span> (<span style="color:#9b5c2e;font-style:italic">Num</span> <span style="color:#3e87e3">a</span>) <span style="color:#e28964">=></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span>
+</pre>
+この <code>Num</code> っていうのが typeclass と言われるもので，<code>Num a =></code> の部分で制約をかけているわけ．<br />
+かっこ良くいうと <code>a</code> を <code>Num</code> の instance に制限する，ということらしい．
+</p>
+<h3>Numeric Types</h3>
+<p>というわけで数を表す型にどんなものがあるか．
+<ul>
+<li><code>Int</code>. 精度の固定されてるよくある整数型．少なくとも <code>[-2^29 .. 2^29-1]</code> を扱えるらしい．</li>
+<li><code>Integer</code>. 任意精度の整数（メモリのある限り数え続けてくれる）．python でいう Long Integer.</li>
+<li><code>Float</code>. 単精度浮動小数点型．特段事情がなければ <code>Double</code> 使いましょう．</li>
+<li><code>Double</code>. 倍精度浮動小数点型．小数というか実数扱うならだいたいこれのお世話になる．</li>
+</ul>
+</p>
+<p>この光のもとで足し算とかそのへんを見なおしてみる． <br />
+先ほど申し上げた通り，
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">(+)</span> <span style="color:#e28964">::</span> (<span style="color:#9b5c2e;font-style:italic">Num</span> <span style="color:#3e87e3">a</span>) <span style="color:#e28964">=></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span>
+</pre>
+というわけですが，では例えば
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#3387cc">3</span> <span style="color:#e28964">+</span> <span style="color:#3387cc">2.5</span>
+</pre>
+これ整数 (<code>Int</code> とか <code>Integer</code> とか) と
+非整数 (<code>Float</code> or <code>Double</code>) の足し算にみえるけど．<br />
+でも2つの型が違うと困る．上の <code>a -> a -> a</code> が困る．<br />
+実は：
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t 3
+3 :: Num a => a
+</pre>
+3 自体はまだ <code>Int</code> でも <code>Integer</code> でも <code>Double</code> でも無いわけですねー．
+じゃあ 2.5 はっと
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :t 2.5
+2.5 :: Fractional a => a
+</pre>
+ほみほみ．なんか <code>Real</code> とか <code>Eq</code> とか色々あるみたいやけど，今は深入りはやめとこう．<br >
+少なくとも <code>Fractional</code> は <code>Num</code> で，
+<code>Int</code> や <code>Integral</code> は <code>Fractional</code> じゃないです． <br />
+Haskell さんの解釈としては，まず制約のきつい <code>2.5</code> の方を考えて，<br />
+特に他に情報はないのでデフォルトの <code>Double</code> として処理し，その後全体によきにはからう．<br />
+結局（この場合）計算全体は <code>Double</code> で進行して <code>Double</code> で帰ってくる．<br />
+これ，型キャストとも雰囲気が似ているが，Haskell では明示的に polymorphic なものにしか行われない．<br />
+</p>
+<!--
+<p>たとえば<br />
+<code>foo.hs</code> （前にも出てきたとか気にしない）
+<pre style="background:#000;color:#f8f8f8">
+x <span style="color:#e28964">=</span> <span style="color:#3387cc">2</span>
+</pre>
+ここから ghci で
+<pre style="background:#000;color:#f8f8f8">
+Prelude> :l foo.hs 
+[1 of 1] Compiling Main             ( foo.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> :t x
+x :: Integer
+</pre>
+>>>突然の Integer <<<
+でちょっとこまる
+-->
