@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-en.wikibooks の <a href="http://en.wikibooks/org/wiki/Haskell">Haskell</a> をベースに．<br />
+en.wikibooks の <a href="http://en.wikibooks/org/wiki/Haskell">Haskell</a>, pdf 版 をベースに．<br />
 wikibooks のライセンスを継承して CC-BY-SA です．
 <h2>Getting set up</h2>
 <p>
@@ -1071,3 +1071,47 @@ x :: Integer
 >>>突然の Integer <<<
 でちょっとこまる
 -->
+<p>
+さてさて．
+<code Haskell>
+Prelude> :t (/)
+(/) :: Fractional a => a -> a -> a 
+</code>
+<code>Fractional</code> への制限は，python2.x みたいに <code>3/2</code> が <code>1</code> にはなってほしくないので必要だけど，<br />
+たとえばはっきり <code>Int</code> やでって宣言してるような奴
+<code Haskell>
+Prelude> :t length 
+length :: [a] -> Int
+</code>
+とかでやろうとしてみると
+<code Plain Text>
+Prelude> 4 / length [1,2]
+
+<interactive>:2:3:
+    No instance for (Fractional Int) arising from a use of `/'
+    Possible fix: add an instance declaration for (Fractional Int)
+    In the expression: 4 / length [1, 2]
+    In an equation for `it': it = 4 / length [1, 2]
+</code>
+polymorphism が型キャストと違うというのはこういうところ．<br />
+なおこの場合は便利な関数があって，
+<code Haskell>
+fromIntegral :: (Integral a, Num b) => a -> b
+</code>
+見ての通り．
+<code Plain Text>
+Prelude> 4 / fromIntegral(length [1,2])
+2.0
+Prelude> 4 / fromIntegral(length [1,2,3])
+1.3333333333333333
+</code>
+めでたし．かな．
+</p>
+<p>ついでに補足．
+<code Haskell>
+(==) :: (Eq a) => a -> a -> Bool
+</code>
+この <code>Eq</code> は正味比較して等しいかどうかを判断できるもの，みたいなアレ．non-functional なのはだいたいこれらしい．<br /> 
+typeclass のもっとすごい力とか，カスタマイズの仕方とかは，後々出てくるのでお待ちください．
+<h2> Building Vocabulary </h2>
+

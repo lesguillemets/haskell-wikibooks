@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-en.wikibooks の <a href="http://en.wikibooks/org/wiki/Haskell">Haskell</a> をベースに．<br />
+en.wikibooks の <a href="http://en.wikibooks/org/wiki/Haskell">Haskell</a>, pdf 版 をベースに．<br />
 wikibooks のライセンスを継承して CC-BY-SA です．
 <h2>Getting set up</h2>
 <p>
@@ -1071,3 +1071,47 @@ x :: Integer
 >>>突然の Integer <<<
 でちょっとこまる
 -->
+<p>
+さてさて．
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#3387cc">Prelude</span><span style="color:#e28964">></span> <span style="color:#e28964">:</span>t <span style="color:#89bdff">(/)</span>
+<span style="color:#89bdff">(/)</span> <span style="color:#e28964">::</span> <span style="color:#99cf50">Fractional</span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">=></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span> 
+</pre>
+<code>Fractional</code> への制限は，python2.x みたいに <code>3/2</code> が <code>1</code> にはなってほしくないので必要だけど，<br />
+たとえばはっきり <code>Int</code> やでって宣言してるような奴
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#3387cc">Prelude</span><span style="color:#e28964">></span> <span style="color:#e28964">:</span>t <span style="color:#dad085">length</span> 
+<span style="color:#89bdff">length</span> <span style="color:#e28964">::</span> [<span style="color:#3e87e3">a</span>] <span style="color:#e28964">-></span> <span style="color:#9b859d">Int</span>
+</pre>
+とかでやろうとしてみると
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 4 / length [1,2]
+
+&lt;interactive>:2:3:
+    No instance for (Fractional Int) arising from a use of `/'
+    Possible fix: add an instance declaration for (Fractional Int)
+    In the expression: 4 / length [1, 2]
+    In an equation for `it': it = 4 / length [1, 2]
+</pre>
+polymorphism が型キャストと違うというのはこういうところ．<br />
+なおこの場合は便利な関数があって，
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">fromIntegral</span> <span style="color:#e28964">::</span> (<span style="color:#99cf50">Integral</span> <span style="color:#3e87e3">a</span>, <span style="color:#99cf50">Num</span> <span style="color:#3e87e3">b</span>) <span style="color:#e28964">=></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">b</span>
+</pre>
+見ての通り．
+<pre style="background:#000;color:#f8f8f8">
+Prelude> 4 / fromIntegral(length [1,2])
+2.0
+Prelude> 4 / fromIntegral(length [1,2,3])
+1.3333333333333333
+</pre>
+めでたし．かな．
+</p>
+<p>ついでに補足．
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">(==)</span> <span style="color:#e28964">::</span> (<span style="color:#9b5c2e;font-style:italic">Eq</span> <span style="color:#3e87e3">a</span>) <span style="color:#e28964">=></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Bool</span>
+</pre>
+この <code>Eq</code> は正味比較して等しいかどうかを判断できるもの，みたいなアレ．non-functional なのはだいたいこれらしい．<br /> 
+typeclass のもっとすごい力とか，カスタマイズの仕方とかは，後々出てくるのでお待ちください．
+<h2> Building Vocabulary </h2>
+
