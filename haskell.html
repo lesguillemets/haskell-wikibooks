@@ -1116,4 +1116,82 @@ Prelude> 4 / fromIntegral(length [1,2,3])
 この <code>Eq</code> は正味比較して等しいかどうかを判断できるもの，みたいなアレ．non-functional なのはだいたいこれらしい．<br /> 
 typeclass のもっとすごい力とか，カスタマイズの仕方とかは，後々出てくるのでお待ちください．
 <h2> Building Vocabulary </h2>
+<h3> Function composition </h3>
+<p> 
+関数の合成というかなんというか．普通に g(f(x)) な感じでよろしい．
+<code Haskell>
+f x = x + 3
+square x = x * x
+</code>
+で
+<code Plain Text>
+Prelude> square(f 1)
+16
+Prelude> square(f 2)
+25
+Prelude> f (square 1)
+4
+Prelude> f (square 4)
+19
+</code>
+という感じ．
+<code Haskell>
+g x = f (square x)
+</code>
+みたいな書き方もできます．<br />
+これ，括弧がないと <code>f square</code> を計算しようとして上手く行きません．<br />
+関数の合成には特別な書き方もあります： 数学で関数の合成の時に使う記号を模した<code>(.)</code> を使って
+<code Haskell>
+g x = (f . square) x
+</code>
+そしてこれは
+<code Haskell>
+g  = f . square
+</code>
+と書いても動くがどちらが推奨されてるのかは知らない．
+</p>
 
+<h3> The need for a vocabulary </h3>
+<p>
+さてこうして関数の合成もできるようになり，あと再帰でもやれば色々書けるようになる，のだが，<br />
+その際には Haskell の standard libraries に何があるのかをある程度知っていることは，<br />
+コードの効率とか読みやすさ書きやすさ上結構重要になってきます．<br />
+<small>standard libraries にある関数を自分で書き直すのももちろん勉強になるけどね．</small><br />
+というわけで，そのへんのこと，どう調べたらいいか，とかのお話．
+</p>
+
+<h3> Prelude and the hierarchical libraries </h3>
+<p>
+とうとう来ました．ghci を起動するときに出てくるアレ．
+<code Plain Text>
+Prelude> 
+</code>
+この <code>Prelude</code> はすべての Haskell プログラムでデフォルトで読み込まれる core library.  <br />
+これまで扱ったようなごく基本的な関数や，<code>map</code> とか <code>filter</code> みたいなもうちょっと高級な（？）ものなど．<br />
+そしてデフォルトでは読み込まれずに <code>import</code> (ghci からは <code>:module</code>) する必要のある module たち，<br />
+hierarchical libraries がある．<br />
+例えば <code>permutations</code> という関数が <code>Data.List</code> にあって，これを使うときはソースで
+<code Haskell>
+import Data.List
+testPermitations = permutations "Prelude"
+</code>
+ghci から読み込む場合は，前にも書いた通り
+<code Plain Text>
+Prelude> :m Data.List
+</code>
+複数読み込む（読み込まれる module を追加していく）時は
+<code Plain Text>
+Prelude> :m +Data.List
+</code>
+と <code>+</code> を使う．<br />
+折角だから使ってみましょう
+<code Plain Text>
+Prelude> :m +Data.List 
+Prelude Data.List> :t permutations 
+permutations :: [a] -> [[a]]
+Prelude Data.List> permutations "sll"
+["sll","lsl","lls","lls","lsl","sll"]
+</code>
+つまるところこの <code>></code> の左側にあるのは現在読み込まれてるライブラリ，という感じ．
+</p>
+<h3> One exhibit </h3>
