@@ -1197,3 +1197,78 @@ Prelude Data.List> permutations "sll"
 つまるところこの <code>></code> の左側にあるのは現在読み込まれてるライブラリ，という感じ．
 </p>
 <h3> One exhibit </h3>
+<p>
+便利なライブラリをちゃんと使おう，な話．<br />
+関数：単語がスペースで区切られた文字列を受け取って単語を逆順に並べたのを返す．<br />
+the quick brown fox なら fox brown quick the になるもの．
+python なら
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#99cf50">def</span> <span style="color:#89bdff">rev_words</span>(<span style="color:#3e87e3">text</span>):
+    words <span style="color:#e28964">=</span> text.split()
+    words.reverse()
+    <span style="color:#e28964">return</span> <span style="color:#65b042">" "</span>.join(words)
+</pre>
+Haskell の <code>Prelude</code> にはこんな関数たちがいるのだ！
+<ul>
+<li><code>words</code>, (Tab とかもアリで）空白で区切られた単語を含む文字列を単語のリストにして返す</li>
+<li><code>reverse</code> list を reverse する</li>
+<li><code>unwords</code> words の反対．</li>
+</ul>
+でこれを使えば
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">revWords</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">String</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">String</span>
+revWords input <span style="color:#e28964">=</span> (<span style="color:#dad085">unwords</span><span style="color:#e28964">.</span> <span style="color:#dad085">reverse</span><span style="color:#e28964">.</span> <span style="color:#dad085">words</span>) input
+</pre>
+いい感じでかけます．
+一方，上の便利な関数を使わず，これまでやってきたこと + ちょっと，だけ使うならこう書ける（ '''ヤバ''' い）．
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">monsterRevWords</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">String</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">String</span>
+monsterRevWords input <span style="color:#e28964">=</span> rejoinUnreversed (divideReversed input)
+    <span style="color:#e28964">where</span>
+    divideReversed s <span style="color:#e28964">=</span> go1 <span style="color:#3387cc">[]</span> s
+        <span style="color:#e28964">where</span>
+        go1 divided <span style="color:#3387cc">[]</span> <span style="color:#e28964">=</span> divided
+        go1 <span style="color:#3387cc">[]</span> (c<span style="color:#e28964">:</span>cs)
+            <span style="color:#e28964">|</span> testSpace c <span style="color:#e28964">=</span> go1 <span style="color:#3387cc">[]</span> cs
+            <span style="color:#e28964">|</span> <span style="color:#dad085">otherwise</span>   <span style="color:#e28964">=</span> go1 [<span style="color:#3387cc">[]</span>] (c<span style="color:#e28964">:</span>cs)
+        go1 (w<span style="color:#e28964">:</span>ws) [c]
+            <span style="color:#e28964">|</span> testSpace c <span style="color:#e28964">=</span> (w<span style="color:#e28964">:</span>ws)
+            <span style="color:#e28964">|</span> <span style="color:#dad085">otherwise</span>   <span style="color:#e28964">=</span> ((c<span style="color:#e28964">:</span>w)<span style="color:#e28964">:</span>ws)
+        go1 (w<span style="color:#e28964">:</span>ws) (c<span style="color:#e28964">:</span>c'<span style="color:#e28964">:</span>cs)
+            <span style="color:#e28964">|</span> testSpace c <span style="color:#e28964">=</span>
+                <span style="color:#e28964">if</span> testSpace c'
+                    <span style="color:#e28964">then</span> go1 (w<span style="color:#e28964">:</span>ws) (c'<span style="color:#e28964">:</span>cs)
+                    <span style="color:#e28964">else</span> go1 ([c']<span style="color:#e28964">:</span>w<span style="color:#e28964">:</span>ws) cs
+            <span style="color:#e28964">|</span> <span style="color:#dad085">otherwise</span> <span style="color:#e28964">=</span>
+                <span style="color:#e28964">if</span> testSpace c'
+                    <span style="color:#e28964">then</span> go1 ((c<span style="color:#e28964">:</span>w)<span style="color:#e28964">:</span>ws) (c'<span style="color:#e28964">:</span>cs)
+                    <span style="color:#e28964">else</span> go1 ((c<span style="color:#e28964">:</span>w)<span style="color:#e28964">:</span>ws) (c'<span style="color:#e28964">:</span>cs)
+    testSpace c <span style="color:#e28964">=</span> c <span style="color:#e28964">==</span> <span style="color:#65b042">' '</span>
+    rejoinUnreversed <span style="color:#3387cc">[]</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">[]</span>
+    rejoinUnreversed [w] <span style="color:#e28964">=</span> reverseList w
+    rejoinUnreversed strings <span style="color:#e28964">=</span> go2 (<span style="color:#65b042">' '</span> <span style="color:#e28964">:</span> reverseList newFirstWord) (otherWords)
+        <span style="color:#e28964">where</span>
+        revStrings <span style="color:#e28964">=</span> reverseList strings
+        newFirstWord <span style="color:#e28964">=</span> <span style="color:#dad085">head</span> revStrings
+        otherWords <span style="color:#e28964">=</span> <span style="color:#dad085">tail</span> revStrings
+        go2 rejoined (<span style="color:#3387cc">[]</span><span style="color:#e28964">:</span><span style="color:#3387cc">[]</span>) <span style="color:#e28964">=</span> rejoined
+        go2 rejoined (<span style="color:#3387cc">[]</span><span style="color:#e28964">:</span>(w'<span style="color:#e28964">:</span>ws')) <span style="color:#e28964">=</span> go2 (rejoined) ((<span style="color:#65b042">' '</span><span style="color:#e28964">:</span>w')<span style="color:#e28964">:</span>ws')
+        go2 rejoined ((c<span style="color:#e28964">:</span>cs)<span style="color:#e28964">:</span>ws) <span style="color:#e28964">=</span> go2 (c<span style="color:#e28964">:</span>rejoined) (cs<span style="color:#e28964">:</span>ws)
+    reverseList <span style="color:#3387cc">[]</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">[]</span>
+    reverseList w <span style="color:#e28964">=</span> go3 <span style="color:#3387cc">[]</span> w
+        <span style="color:#e28964">where</span>
+        go3 rev <span style="color:#3387cc">[]</span> <span style="color:#e28964">=</span> rev
+        go3 rev (c<span style="color:#e28964">:</span>cs) <span style="color:#e28964">=</span> go3 (c<span style="color:#e28964">:</span>rev) cs
+</pre>
+もちろん初学者たる我々にとっては読めば勉強になるだろうけれど，基本的には読む気にならないし，アレ．<br />
+そもそもこれでほんとにちゃんと動くのか確信持てないしちょっと書き換えるのも大変そう．<br />
+さらにここで
+<pre style="background:#000;color:#f8f8f8">
+testSpace c <span style="color:#e28964">=</span> c <span style="color:#e28964">==</span> <span style="color:#65b042">' '</span>
+</pre>
+とある通り，この場合単語を区切るのは半角スペースじゃないといけない (tab や 改行コードはだめ）．<br />
+など，まあこれを使いたくはない．<small>なお <code>Data.Char</code> にある <code>isSpace</code> を使えばそのへん含めて空白か判定できる．らしい．</code><br />
+と，まあ色々 ''ヤバ'' いので，しっかり使える道具は使いましょう，というおはなし．
+</p>
+<h3> Acquiring vocabulary </h3>
+

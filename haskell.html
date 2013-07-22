@@ -1195,3 +1195,78 @@ Prelude Data.List> permutations "sll"
 つまるところこの <code>></code> の左側にあるのは現在読み込まれてるライブラリ，という感じ．
 </p>
 <h3> One exhibit </h3>
+<p>
+便利なライブラリをちゃんと使おう，な話．<br />
+関数：単語がスペースで区切られた文字列を受け取って単語を逆順に並べたのを返す．<br />
+the quick brown fox なら fox brown quick the になるもの．
+python なら
+<code Python>
+def rev_words(text):
+    words = text.split()
+    words.reverse()
+    return " ".join(words)
+</code>
+Haskell の <code>Prelude</code> にはこんな関数たちがいるのだ！
+<ul>
+<li><code>words</code>, (Tab とかもアリで）空白で区切られた単語を含む文字列を単語のリストにして返す</li>
+<li><code>reverse</code> list を reverse する</li>
+<li><code>unwords</code> words の反対．</li>
+</ul>
+でこれを使えば
+<code Haskell>
+revWords :: String -> String
+revWords input = (unwords. reverse. words) input
+</code>
+いい感じでかけます．
+一方，上の便利な関数を使わず，これまでやってきたこと + ちょっと，だけ使うならこう書ける（ '''ヤバ''' い）．
+<code Haskell>
+monsterRevWords :: String -> String
+monsterRevWords input = rejoinUnreversed (divideReversed input)
+    where
+    divideReversed s = go1 [] s
+        where
+        go1 divided [] = divided
+        go1 [] (c:cs)
+            | testSpace c = go1 [] cs
+            | otherwise   = go1 [[]] (c:cs)
+        go1 (w:ws) [c]
+            | testSpace c = (w:ws)
+            | otherwise   = ((c:w):ws)
+        go1 (w:ws) (c:c':cs)
+            | testSpace c =
+                if testSpace c'
+                    then go1 (w:ws) (c':cs)
+                    else go1 ([c']:w:ws) cs
+            | otherwise =
+                if testSpace c'
+                    then go1 ((c:w):ws) (c':cs)
+                    else go1 ((c:w):ws) (c':cs)
+    testSpace c = c == ' '
+    rejoinUnreversed [] = []
+    rejoinUnreversed [w] = reverseList w
+    rejoinUnreversed strings = go2 (' ' : reverseList newFirstWord) (otherWords)
+        where
+        revStrings = reverseList strings
+        newFirstWord = head revStrings
+        otherWords = tail revStrings
+        go2 rejoined ([]:[]) = rejoined
+        go2 rejoined ([]:(w':ws')) = go2 (rejoined) ((' ':w'):ws')
+        go2 rejoined ((c:cs):ws) = go2 (c:rejoined) (cs:ws)
+    reverseList [] = []
+    reverseList w = go3 [] w
+        where
+        go3 rev [] = rev
+        go3 rev (c:cs) = go3 (c:rev) cs
+</code>
+もちろん初学者たる我々にとっては読めば勉強になるだろうけれど，基本的には読む気にならないし，アレ．<br />
+そもそもこれでほんとにちゃんと動くのか確信持てないしちょっと書き換えるのも大変そう．<br />
+さらにここで
+<code Haskell>
+testSpace c = c == ' '
+</code>
+とある通り，この場合単語を区切るのは半角スペースじゃないといけない (tab や 改行コードはだめ）．<br />
+など，まあこれを使いたくはない．<small>なお <code>Data.Char</code> にある <code>isSpace</code> を使えばそのへん含めて空白か判定できる．らしい．</code><br />
+と，まあ色々 ''ヤバ'' いので，しっかり使える道具は使いましょう，というおはなし．
+</p>
+<h3> Acquiring vocabulary </h3>
+
