@@ -1210,9 +1210,9 @@ python なら
 </pre>
 Haskell の <code>Prelude</code> にはこんな関数たちがいるのだ！
 <ul>
-<li><code>words</code>, (Tab とかもアリで）空白で区切られた単語を含む文字列を単語のリストにして返す</li>
-<li><code>reverse</code> list を reverse する</li>
-<li><code>unwords</code> words の反対．</li>
+<li><code>words</code>. (Tab とかもアリで）空白で区切られた単語を含む文字列を単語のリストにして返す</li>
+<li><code>reverse</code>. list を reverse する</li>
+<li><code>unwords</code>. words の反対．</li>
 </ul>
 でこれを使えば
 <pre style="background:#000;color:#f8f8f8">
@@ -1267,8 +1267,19 @@ monsterRevWords input <span style="color:#e28964">=</span> rejoinUnreversed (div
 testSpace c <span style="color:#e28964">=</span> c <span style="color:#e28964">==</span> <span style="color:#65b042">' '</span>
 </pre>
 とある通り，この場合単語を区切るのは半角スペースじゃないといけない (tab や 改行コードはだめ）．<br />
-など，まあこれを使いたくはない．<small>なお <code>Data.Char</code> にある <code>isSpace</code> を使えばそのへん含めて空白か判定できる．らしい．</code><br />
+など，まあこれを使いたくはない．<small>なお <code>Data.Char</code> にある <code>isSpace</code> を使えばそのへん含めて空白か判定できる．らしい．</small><br />
 と，まあ色々 ''ヤバ'' いので，しっかり使える道具は使いましょう，というおはなし．
 </p>
 <h3> Acquiring vocabulary </h3>
+<p>
+こういうのを知るにはどういう手だてがあるか．<br />
+<ul>
+<li><a href="http://www.haskell.org/onlinereport/standard-prelude.html">the prelude specification</a></li>
+<li><a href="http://www.haskell.org/ghc/docs/latest/html/libraries/index.html">GHC hierarchical libraries documentation</a>
+<li><a href="http://www.haskell.org/hoogle">Hoogle</a>, ghc に入ってるライブラリを網羅した検索エンジン．
+<li><a href="http://holumbus.fh-wedel.de/hayoo/hayoo.html">Hayoo!</a>, デフォルトでは入ってないのも含めていろんなライブラリをカバーする検索エンジン．
+</ul>
+あたりがとりあえず鉄板のようだ．あとはぐぐれぐぐれ．必要なときにはまた追加を書くよ．
+</p>
 
+<h2> Next Steps </h2>
