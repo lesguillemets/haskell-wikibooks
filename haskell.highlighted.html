@@ -270,6 +270,7 @@ area r <span style="color:#e28964">=</span> <span style="color:#dad085">pi</span
 </pre>
 関数名，space あけて argument(s) の順に書いて括弧は使わない．<br />
 <code>def</code> みたいな特別な syntax はなく， <code>r = 5</code> って定義したのと同じノリで，この書き方で定義する．<br />
+関数名は camelCase でつけることが多いようだ（最初を UpperCase にすると型名な感じになるので避けよう）．
 </p>
 <p>
 さてではこれを call してみよう．とりあえずは ghci で読み込んで
@@ -1283,3 +1284,133 @@ testSpace c <span style="color:#e28964">=</span> c <span style="color:#e28964">=
 </p>
 
 <h2> Next Steps </h2>
+大事な pattern matching と，割とこれまでやった書き方でも書けることの新たな書き方 <code>if</code> と <code>let</code> をやるぜ．
+<h3> <code>if / then / else</code> </h3>
+<p>
+数 x を受け取って， x が負なら -1, 正なら 1, 0 なら 0　を返す関数．<br />
+Prelude に <code>signum</code> という関数が用意されているが，丁度いいので書いてみる．
+<pre style="background:#000;color:#f8f8f8">
+mySignum x <span style="color:#e28964">=</span>
+    <span style="color:#e28964">if</span> x <span style="color:#e28964">&lt;</span> <span style="color:#3387cc">0</span>
+        <span style="color:#e28964">then</span> <span style="color:#e28964">-</span><span style="color:#3387cc">1</span>
+        <span style="color:#e28964">else</span> <span style="color:#e28964">if</span> x <span style="color:#e28964">></span><span style="color:#3387cc">0</span>
+            <span style="color:#e28964">then</span> <span style="color:#3387cc">1</span>
+            <span style="color:#e28964">else</span> <span style="color:#3387cc">0</span>
+</pre>
+でよろしい．構文としては見たとおりだが，注意点は
+<ul>
+<li><code>then</code> と <code>else</code> は両方いるよ．</li>
+<li><code>then</code> と <code>else</code> で返る値の型は一緒じゃないといけないよ．</li>
+<li><code>-1</code> とかでチェックしたい時は
+<pre style="background:#000;color:#f8f8f8">
+*Main> mySignum (-1)
+</pre>
+と <code>()</code> が必要．ないと <code>mySignum</code> から 1 を引こうとしてエラーになる．<br />
+guard でも書けるよね
+<pre style="background:#000;color:#f8f8f8">
+mySignum' x
+    <span style="color:#e28964">|</span> x <span style="color:#e28964">&lt;</span> <span style="color:#3387cc">0</span>    <span style="color:#e28964">=</span> <span style="color:#e28964">-</span><span style="color:#3387cc">1</span>
+    <span style="color:#e28964">|</span> x <span style="color:#e28964">></span> <span style="color:#3387cc">0</span>    <span style="color:#e28964">=</span> <span style="color:#3387cc">1</span>
+    <span style="color:#e28964">|</span> <span style="color:#dad085">otherwise</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">0</span>
+</pre>
+</p>
+<h3> Introducing pattern matching </h3>
+<p>
+レースの順位と得点：
+<ul>
+<li> 1位 → 10点</li>
+<li> 2位 → 6点</li>
+<li> 3位 → 4点</li>
+<li> 4位 → 3点</li>
+<li> 5位 → 2点</li>
+<li> 6位 → 1点</li>
+<li> それ以下 → 得点なし</li>
+</ul>
+というのを考えてみよう．順位から得点を計算してくれる関数を作りたいが， <code>if</code> で書くのはやりたくない．<br />
+</p><p>
+実はよい書き方があって (pattern matching という),
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">pts</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">Int</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Int</span>
+pts <span style="color:#3387cc">1</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">10</span>
+pts <span style="color:#3387cc">2</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">6</span>
+pts <span style="color:#3387cc">3</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">4</span>
+pts <span style="color:#3387cc">4</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">3</span>
+pts <span style="color:#3387cc">5</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">2</span>
+pts <span style="color:#3387cc">6</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">1</span>
+pts _ <span style="color:#e28964">=</span> <span style="color:#3387cc">0</span>
+</pre>
+で書けてしまうのだ．正味函数書いていってる感じですね．<br />
+最後の <code>_</code> は「それ以外の全部」みたいな意味．<br />
+</p><p>
+上の得点ぐっと睨むと 3位以下は等差な感じなので
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">pts</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">Int</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Int</span>
+pts <span style="color:#3387cc">1</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">10</span>
+pts <span style="color:#3387cc">2</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">6</span>
+pts x
+    <span style="color:#e28964">|</span> x <span style="color:#e28964">&lt;=</span> <span style="color:#3387cc">6</span>    <span style="color:#e28964">=</span> <span style="color:#3387cc">7</span> <span style="color:#e28964">-</span> x
+    <span style="color:#e28964">|</span> <span style="color:#dad085">otherwise</span> <span style="color:#e28964">=</span> <span style="color:#3387cc">0</span>
+</pre>
+と書いたりできる．<br />
+これ，例えば logical or (<code>||</code>) とかも書けるぜ．
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">(||)</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">Bool</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Bool</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Bool</span>
+<span style="color:#cf6a4c">False</span> <span style="color:#e28964">||</span> <span style="color:#cf6a4c">False</span> <span style="color:#e28964">=</span> <span style="color:#cf6a4c">False</span>
+_     <span style="color:#e28964">||</span> _     <span style="color:#e28964">=</span> <span style="color:#cf6a4c">True</span>
+</pre>
+とか
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">(||)</span> <span style="color:#e28964">::</span> <span style="color:#9b859d">Bool</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Bool</span> <span style="color:#e28964">-></span> <span style="color:#9b859d">Bool</span>
+<span style="color:#cf6a4c">True</span>  <span style="color:#e28964">||</span> _ <span style="color:#e28964">=</span> <span style="color:#cf6a4c">False</span>
+<span style="color:#cf6a4c">False</span> <span style="color:#e28964">||</span> y <span style="color:#e28964">=</span> y
+</pre>
+とかね．
+<ul>
+<li> 定義がかぶると最初に書かれたほうが優先されると共に "Pattern match(es) are overlapped" とか言われるよ．</li>
+<li> どの pattern にも match しなかったら error が出るので最後に <code>_</code> とか入れとくのおすすめ．</li>
+<li> 数学っぽいぜってテンション上がってこれを書いても上手く行かないよ：
+<pre style="background:#000;color:#f8f8f8">
+(&amp;&amp;) <span style="color:#e28964">::</span> <span style="color:#3387cc">Bool</span> <span style="color:#e28964">-></span> <span style="color:#3387cc">Bool</span> <span style="color:#e28964">-></span> <span style="color:#3387cc">Bool</span>
+x &amp;&amp; x <span style="color:#e28964">==</span> x <span style="color:#aeaeae;font-style:italic">--Oops!</span>
+_ &amp;&amp; _ <span style="color:#e28964">==</span> <span style="color:#cf6a4c">False</span>
+</pre>
+最初から <code>_ && _</code> と書いてるも同然なばかりか "Conflicting definitions for 'x'" っていって怒られる． </li>
+</ul>
+</p>
+<h3> Tuple and list patterns </h3>
+<p>
+さてこれ，上のでもありがたいけど Tuple とか list 扱うときに凄いんですよね．
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">fst'</span> <span style="color:#e28964">::</span> (<span style="color:#3e87e3">a</span>, <span style="color:#3e87e3">b</span>) <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span>
+<span style="color:#dad085">fst</span>' (x, _) <span style="color:#e28964">=</span> x
+</pre>
+ﾄﾞﾔ．それから head と tail
+<pre style="background:#000;color:#f8f8f8">
+<span style="color:#89bdff">head</span> <span style="color:#e28964">::</span> [<span style="color:#3e87e3">a</span>] <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span>
+<span style="color:#dad085">head</span> (x<span style="color:#e28964">:</span>_) <span style="color:#e28964">=</span> x
+<span style="color:#dad085">head</span> <span style="color:#3387cc">[]</span>    <span style="color:#e28964">=</span> <span style="color:#dad085">error</span> <span style="color:#65b042">"Prelude.head: empty list"</span>
+
+<span style="color:#89bdff">tail</span> <span style="color:#e28964">::</span> [<span style="color:#3e87e3">a</span>] <span style="color:#e28964">-></span> <span style="color:#3e87e3">a</span>
+<span style="color:#dad085">tail</span> (_<span style="color:#e28964">:</span>xs) <span style="color:#e28964">=</span> xs
+<span style="color:#dad085">tail</span> <span style="color:#3387cc">[]</span> <span style="color:#e28964">=</span> <span style="color:#dad085">error</span> <span style="color:#65b042">"Prelude.tail: empty list"</span>
+</pre>
+ちゃんとできてるやん．<br />
+というかんじですごい．特に再帰扱う時とかにも強いので楽しみにしておこう．
+</p>
+
+<h3> <code>let</code> bindings </h3>
+<p>
+<code>let</code> の書き方だ．<code>where</code> とかなり互換だけど，<br />
+どういうときにどっち使うのがよりよいかとかは haskell wiki でも<a href='http://www.haskell.org/haskellwiki/Let_vs._Where'>議論になってたりする</a> のでそのうちご覧を．<br />
+例えば a,b,c が与えられて ax^2 + bx + c = 0 の解を与えたい場合とか
+<pre style="background:#000;color:#f8f8f8">
+roots a b c <span style="color:#e28964">=</span>
+    <span style="color:#e28964">let</span> sdisc <span style="color:#e28964">=</span> <span style="color:#dad085">sqrt</span> (b*b <span style="color:#e28964">-</span> <span style="color:#3387cc">4</span>*a*c)
+    <span style="color:#e28964">in</span> ( (<span style="color:#e28964">-</span>b<span style="color:#e28964">+</span>sdisc) <span style="color:#e28964">/</span> (<span style="color:#3387cc">2</span>*a) , (<span style="color:#e28964">-</span>b<span style="color:#e28964">-</span>sdisc) <span style="color:#e28964">/</span> (<span style="color:#3387cc">2</span>*a) )
+</pre>
+where でもかけるから復習がてらやってみよう．<br />
+あ，このあたり haskell の whitespace sensitive さが効いてくるので気をつけてね．
+</p>
+
+<h2> Simple input and output </h2>
+

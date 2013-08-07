@@ -268,6 +268,7 @@ area r = pi * r^2 -- 数式でいうと A(r) = \pi * r^2
 </code>
 関数名，space あけて argument(s) の順に書いて括弧は使わない．<br />
 <code>def</code> みたいな特別な syntax はなく， <code>r = 5</code> って定義したのと同じノリで，この書き方で定義する．<br />
+関数名は camelCase でつけることが多いようだ（最初を UpperCase にすると型名な感じになるので避けよう）．
 </p>
 <p>
 さてではこれを call してみよう．とりあえずは ghci で読み込んで
@@ -1281,3 +1282,133 @@ testSpace c = c == ' '
 </p>
 
 <h2> Next Steps </h2>
+大事な pattern matching と，割とこれまでやった書き方でも書けることの新たな書き方 <code>if</code> と <code>let</code> をやるぜ．
+<h3> <code>if / then / else</code> </h3>
+<p>
+数 x を受け取って， x が負なら -1, 正なら 1, 0 なら 0　を返す関数．<br />
+Prelude に <code>signum</code> という関数が用意されているが，丁度いいので書いてみる．
+<code Haskell>
+mySignum x =
+    if x < 0
+        then -1
+        else if x >0
+            then 1
+            else 0
+</code>
+でよろしい．構文としては見たとおりだが，注意点は
+<ul>
+<li><code>then</code> と <code>else</code> は両方いるよ．</li>
+<li><code>then</code> と <code>else</code> で返る値の型は一緒じゃないといけないよ．</li>
+<li><code>-1</code> とかでチェックしたい時は
+<code Plain Text>
+*Main> mySignum (-1)
+</code>
+と <code>()</code> が必要．ないと <code>mySignum</code> から 1 を引こうとしてエラーになる．<br />
+guard でも書けるよね
+<code Haskell>
+mySignum' x
+    | x < 0    = -1
+    | x > 0    = 1
+    | otherwise = 0
+</code>
+</p>
+<h3> Introducing pattern matching </h3>
+<p>
+レースの順位と得点：
+<ul>
+<li> 1位 → 10点</li>
+<li> 2位 → 6点</li>
+<li> 3位 → 4点</li>
+<li> 4位 → 3点</li>
+<li> 5位 → 2点</li>
+<li> 6位 → 1点</li>
+<li> それ以下 → 得点なし</li>
+</ul>
+というのを考えてみよう．順位から得点を計算してくれる関数を作りたいが， <code>if</code> で書くのはやりたくない．<br />
+</p><p>
+実はよい書き方があって (pattern matching という),
+<code Haskell>
+pts :: Int -> Int
+pts 1 = 10
+pts 2 = 6
+pts 3 = 4
+pts 4 = 3
+pts 5 = 2
+pts 6 = 1
+pts _ = 0
+</code>
+で書けてしまうのだ．正味函数書いていってる感じですね．<br />
+最後の <code>_</code> は「それ以外の全部」みたいな意味．<br />
+</p><p>
+上の得点ぐっと睨むと 3位以下は等差な感じなので
+<code Haskell>
+pts :: Int -> Int
+pts 1 = 10
+pts 2 = 6
+pts x
+    | x <= 6    = 7 - x
+    | otherwise = 0
+</code>
+と書いたりできる．<br />
+これ，例えば logical or (<code>||</code>) とかも書けるぜ．
+<code Haskell>
+(||) :: Bool -> Bool -> Bool
+False || False = False
+_     || _     = True
+</code>
+とか
+<code Haskell>
+(||) :: Bool -> Bool -> Bool
+True  || _ = False
+False || y = y
+</code>
+とかね．
+<ul>
+<li> 定義がかぶると最初に書かれたほうが優先されると共に "Pattern match(es) are overlapped" とか言われるよ．</li>
+<li> どの pattern にも match しなかったら error が出るので最後に <code>_</code> とか入れとくのおすすめ．</li>
+<li> 数学っぽいぜってテンション上がってこれを書いても上手く行かないよ：
+<code Haskell>
+(&&) :: Bool -> Bool -> Bool
+x && x == x --Oops!
+_ && _ == False
+</code>
+最初から <code>_ && _</code> と書いてるも同然なばかりか "Conflicting definitions for 'x'" っていって怒られる． </li>
+</ul>
+</p>
+<h3> Tuple and list patterns </h3>
+<p>
+さてこれ，上のでもありがたいけど Tuple とか list 扱うときに凄いんですよね．
+<code Haskell>
+fst' :: (a, b) -> a
+fst' (x, _) = x
+</code>
+ﾄﾞﾔ．それから head と tail
+<code Haskell>
+head :: [a] -> a
+head (x:_) = x
+head []    = error "Prelude.head: empty list"
+
+tail :: [a] -> a
+tail (_:xs) = xs
+tail [] = error "Prelude.tail: empty list"
+</code>
+ちゃんとできてるやん．<br />
+というかんじですごい．特に再帰扱う時とかにも強いので楽しみにしておこう．
+</p>
+
+<h3> <code>let</code> bindings </h3>
+<p>
+<code>let</code> の書き方だ．<code>where</code> とかなり互換だけど，<br />
+どういうときにどっち使うのがよりよいかとかは haskell wiki でも<a href='http://www.haskell.org/haskellwiki/Let_vs._Where'>議論になってたりする</a> のでそのうちご覧を．<br />
+例えば a,b,c が与えられて ax^2 + bx + c = 0 の解を与えたい場合とか
+<code Haskell>
+roots a b c =
+    let sdisc = sqrt (b*b - 4*a*c)
+    in ( (-b+sdisc) / (2*a) , (-b-sdisc) / (2*a) )
+</code>
+where でもかけるから復習がてらやってみよう．<br />
+あ，このあたり haskell の whitespace sensitive さが効いてくるので気をつけてね．
+</p>
+
+<h2> Simple input and output </h2>
+
